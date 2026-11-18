@@ -22,10 +22,10 @@ export default function Home() {
           <h1 id="hero-name">Hossein<br/><span>Mohammaddokht</span><span className="hero-period">.</span></h1>
           <div className="hero-bottom">
             <p className="hero-role">{profile.role}<br/><span>{profile.focus}</span></p>
-            <p className="hero-intro">I work with the infrastructure behind software — Linux, APIs, Kubernetes and the tools that keep services running. I&apos;m now building products around AI systems and agent workflows.</p>
+            <p className="hero-intro">I work with API platforms, DevOps and production systems. These days I&apos;m building AgentWallet, Atlas and Kuhban, with a growing focus on AI systems and agent workflows.</p>
           </div>
           <div className="hero-chips" aria-label="Primary focus areas">
-            <span>01 / API PLATFORMS</span><span>02 / INFRASTRUCTURE</span><span>03 / AI SYSTEMS</span>
+            <span>01 / API MANAGEMENT</span><span>02 / PLATFORM ENGINEERING</span><span>03 / AGENTIC AI</span>
           </div>
         </section>
         <section className="terminal-section" aria-labelledby="terminal-title">

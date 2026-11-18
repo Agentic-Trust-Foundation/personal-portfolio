@@ -3,6 +3,12 @@ import { ALLOWED_COMMANDS, GUIDED_COMMANDS, GUIDED_EXTRA_COMMANDS, executeComman
 import { profile } from "../content/profile";
 
 describe("CV-only terminal commands", () => {
+  it("lists German at Basic level and keeps DevSecOps training current", () => {
+    const languages = executeCommand("cv languages");
+    expect(languages.lines.join(" ")).toContain("German — Basic");
+    expect(languages.lines.join(" ")).not.toContain("French");
+    expect(executeCommand("cv certs").lines.join(" ")).toContain("DevSecOps Training (2026; final session Nov 20)");
+  });
   it("shows an actionable help reference", () => {
     const help = executeCommand("cv help");
     expect(help.type).toBe("output");
