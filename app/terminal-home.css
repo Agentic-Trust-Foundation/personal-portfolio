@@ -289,3 +289,45 @@
   .cvcli-viewport[data-phase="intro"] .cvcli-guided,
   .cvcli-viewport[data-phase="intro"] .cvcli-form { animation: none; }
 }
+
+/* The hidden Snake runs inside the existing terminal, never in a separate route. */
+.cvcli-game-slot { padding: 8px 0 20px; max-width: 900px; }
+.cv-snake { color: var(--cli-text); outline: none; max-width: 760px; }
+.cv-snake-heading { display: flex; justify-content: space-between; flex-wrap: wrap; align-items: end; gap: 14px; margin-bottom: 16px; }
+.cv-snake-eyebrow { font-size: 10px; color: var(--cli-mid); letter-spacing: .065em; }
+.cv-snake h2 { font-size: clamp(19px, 3vw, 25px); font-weight: 700; letter-spacing: -.05em; margin: 6px 0 0; color: var(--cli-pale); }
+.cv-snake-cursor { color: var(--cli-highlight); animation: cvcli-blink 1s step-end infinite; }
+.cv-snake-scores { display: flex; gap: 23px; font-size: 11px; color: var(--cli-muted); }
+.cv-snake-scores span { display: flex; flex-direction: column; gap: 4px; }
+.cv-snake-scores strong { color: var(--cli-pale); font-size: 16px; font-variant-numeric: tabular-nums; }
+.cv-snake-board-wrap { position: relative; width: min(100%, 640px); padding: 9px; border: 1px solid var(--cli-outline); background: var(--cli-canvas); }
+.cv-snake-board { display: grid; width: 100%; aspect-ratio: 24 / 14; gap: 1px; }
+.cv-snake-cell { display: block; min-width: 0; min-height: 0; background: transparent; }
+.cv-snake-head { background: var(--cli-pale); border-radius: 1px; }
+.cv-snake-body { background: var(--cli-muted); border-radius: 1px; }
+.cv-snake-food { background: var(--cli-pale); border-radius: 50%; transform: scale(.76); }
+.cv-snake-overlay { position: absolute; inset: 9px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; background: color-mix(in srgb, var(--cli-panel) 85%, transparent); }
+.cv-snake-overlay strong { font-size: 23px; color: var(--cli-pale); letter-spacing: .1em; }
+.cv-snake-overlay span { font-size: 11px; color: var(--cli-muted); }
+.cv-snake-bottom { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; align-items: center; margin-top: 14px; }
+.cv-snake-help { font-size: 10px; color: var(--cli-muted); line-height: 1.9; }
+.cv-snake-help span { color: var(--cli-faint); margin: 0 4px; }
+.cv-snake-buttons { display: flex; gap: 7px; }
+.cv-snake-buttons button, .cv-snake-touch button {
+  color: var(--cli-text); background: var(--cli-button); border: 1px solid var(--cli-outline);
+  border-radius: 3px; padding: 9px 11px; font-size: 10px;
+}
+.cv-snake-buttons button:hover:not(:disabled), .cv-snake-touch button:hover { background: var(--cli-hover); }
+.cv-snake-buttons button:disabled { opacity: .45; cursor: default; }
+.cv-snake-touch { display: grid; grid-template-columns: repeat(3, 50px); justify-content: center; gap: 5px; margin-top: 18px; }
+.cv-snake-touch button { height: 42px; font-size: 19px; touch-action: manipulation; }
+@media (min-width: 820px) and (pointer: fine) { .cv-snake-touch { display: none; } }
+@media (max-width: 460px) {
+  .cv-snake-board-wrap { padding: 5px; }
+  .cv-snake-overlay { inset: 5px; }
+  .cv-snake-heading { gap: 8px; }
+  .cv-snake-scores { gap: 13px; }
+  .cv-snake-bottom { align-items: flex-start; flex-direction: column; }
+  .cv-snake-buttons { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) { .cv-snake-cursor { animation: none; } }

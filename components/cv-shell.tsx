@@ -10,6 +10,7 @@ import {
   type MouseEvent,
 } from "react";
 import { profile } from "@/content/profile";
+import CvSnake from "./cv-snake";
 import {
   ALLOWED_COMMANDS,
   GUIDED_COMMANDS,
@@ -49,6 +50,7 @@ export default function CvShell() {
   const [theme, setTheme] = useState<ColorTheme>("dark");
   const [input, setInput] = useState("");
   const [lines, setLines] = useState<TranscriptLine[]>([]);
+  const [snakeActive, setSnakeActive] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [showMore, setShowMore] = useState(false);
@@ -59,6 +61,7 @@ export default function CvShell() {
   const promptRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const guidedRef = useRef<HTMLDivElement>(null);
+  const snakeRef = useRef<HTMLDivElement>(null);
   const lineId = useRef(0);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollAnimationFrame = useRef<number | null>(null);
@@ -92,10 +95,10 @@ export default function CvShell() {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }, []);
 
-  const scrollTo = useCallback((target: "prompt" | "guide") => {
+  const scrollTo = useCallback((target: "prompt" | "guide" | "game") => {
     const viewport = scrollRef.current;
     if (!viewport) return;
-    const anchor = target === "guide" ? guidedRef.current : promptRef.current;
+    const anchor = target === "guide" ? guidedRef.current : target === "game" ? snakeRef.current : promptRef.current;
     if (!anchor) return;
     if (scrollAnimationFrame.current !== null) {
       window.cancelAnimationFrame(scrollAnimationFrame.current);
@@ -145,9 +148,9 @@ export default function CvShell() {
   // frame while the splash closes.
   useEffect(() => {
     if (!mode || !sessionActive) return;
-    const timeout = window.setTimeout(() => scrollTo("prompt"), prefersReducedMotion() ? 0 : 260);
+    const timeout = window.setTimeout(() => scrollTo(snakeActive ? "game" : "prompt"), prefersReducedMotion() ? 0 : 260);
     return () => window.clearTimeout(timeout);
-  }, [mode, lines, sessionActive, showCommandPalette, scrollTo, prefersReducedMotion]);
+  }, [mode, lines, sessionActive, showCommandPalette, snakeActive, scrollTo, prefersReducedMotion]);
 
   const beginSession = useCallback(() => {
     if (sessionActive) return;
@@ -172,6 +175,7 @@ export default function CvShell() {
     if (!command) return;
     const result = executeCommand(command);
     beginSession();
+    if (result.type === "game") setSnakeActive(true);
     setShowCommandPalette(false);
     setShowMore(false);
     setHistory((previous) => [...previous.slice(-79), command]);
@@ -191,13 +195,24 @@ export default function CvShell() {
       anchor.click();
       anchor.remove();
     }
-    promptRef.current?.focus({ preventScroll: true });
+    if (result.type !== "game") promptRef.current?.focus({ preventScroll: true });
   }, [beginSession]);
+
+  const exitSnake = useCallback((score: number) => {
+    setSnakeActive(false);
+    setLines((previous) => [...previous.slice(-59), {
+      id: ++lineId.current,
+      command: "cv play snake · exit",
+      result: { type: "output", title: "Back to CV", lines: ["Final score: " + score + " · Type cv help to continue."] },
+    }]);
+    window.requestAnimationFrame(() => promptRef.current?.focus({ preventScroll: true }));
+  }, []);
 
   function chooseMode(nextMode: ShellMode) {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     closeTimer.current = null;
     setMode(nextMode);
+    setSnakeActive(false);
     setLines([]);
     setHistoryIndex(-1);
     setInput("");
@@ -270,6 +285,7 @@ export default function CvShell() {
   }
 
   function focusEmptySpace(event: MouseEvent<HTMLDivElement>) {
+    if (snakeActive) return;
     const target = event.target as HTMLElement;
     if (target instanceof Element && !target.closest("button,a,input,form")) {
       promptRef.current?.focus({ preventScroll: true });
@@ -414,7 +430,12 @@ export default function CvShell() {
                   </div>
                 ))}
               </div>
-              <form onSubmit={submit} className="cvcli-form" aria-label="CV command input">
+              {snakeActive ? (
+                <div ref={snakeRef} className="cvcli-game-slot">
+                  <CvSnake onExit={exitSnake} />
+                </div>
+              ) : (
+                <form onSubmit={submit} className="cvcli-form" aria-label="CV command input">
                 <label htmlFor="cvcli-command" className="cvcli-form-label">
                   <span>visitor@hossein</span><span className="cvcli-form-sep">:</span>
                   <span>~</span><span className="cvcli-form-dollar">$</span>
@@ -431,16 +452,17 @@ export default function CvShell() {
                   </button>
                 ) : <span className="cvcli-enter-hint" aria-hidden="true">↵ Enter</span>}
               </form>
-              {hint && <div className="cvcli-hint" role="status">{hint}</div>}
+              )}
+              {!snakeActive && hint && <div className="cvcli-hint" role="status">{hint}</div>}
             </>
           )}
         </div>
 
         <footer className="cvcli-status" aria-label="Terminal status">
-          <div className="cvcli-status-left"><span className="cvcli-status-dot" /> {sessionActive ? "ACTIVE SESSION" : mode ? `${mode.toUpperCase()} MODE` : "SESSION NOT STARTED"}</div>
+          <div className="cvcli-status-left"><span className="cvcli-status-dot" /> {snakeActive ? "SNAKE ACTIVE" : sessionActive ? "ACTIVE SESSION" : mode ? `${mode.toUpperCase()} MODE` : "SESSION NOT STARTED"}</div>
           {mode && <button className="cvcli-status-switch" type="button" onClick={() => chooseMode(mode === "guided" ? "expert" : "guided")}>Switch mode ↔</button>}
           <div className="cvcli-status-center">SAFE CV CLI · NO OS SHELL</div>
-          <div className="cvcli-status-right">{mode === "expert" ? "TAB: COMPLETE · ↑↓: HISTORY" : mode === "guided" ? "CLICK OR TYPE" : "CHOOSE 1 OR 2"}</div>
+          <div className="cvcli-status-right">{snakeActive ? "ARROWS/WASD · P: PAUSE · ESC: EXIT" : mode === "expert" ? "TAB: COMPLETE · ↑↓: HISTORY" : mode === "guided" ? "CLICK OR TYPE" : "CHOOSE 1 OR 2"}</div>
         </footer>
       </div>
       {!sessionActive && <div className="cvcli-below" aria-hidden="true"><span>DEVOPS / API MANAGEMENT / AGENTIC AI</span><span>© {new Date().getFullYear()} {profile.name}</span></div>}

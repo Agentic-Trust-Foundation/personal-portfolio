@@ -40,6 +40,24 @@ async function settleTransition() {
 }
 
 describe("Terminal-first CV interaction", () => {
+  it("launches the hidden Snake inside the terminal and restores the same CV session on Escape", async () => {
+    await click("Yes, I have");
+    const input = host.querySelector("#cvcli-command") as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+    if (!setter) throw new Error("Missing native input setter");
+    await act(async () => {
+      setter.call(input, "cv play snake");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    const form = host.querySelector(".cvcli-form") as HTMLFormElement;
+    await act(async () => { form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); });
+    expect(host.querySelector('[aria-label="CV Snake game"]')).toBeTruthy();
+    expect(host.querySelector("#cvcli-command")).toBeNull();
+    await act(async () => { window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); });
+    expect(host.querySelector('[aria-label="CV Snake game"]')).toBeNull();
+    expect(host.querySelector("#cvcli-command")).toBeTruthy();
+    expect(host.textContent).toContain("Back to CV");
+  });
   it("starts in the dark terminal and asks about Bash", () => {
     expect(host.querySelector(".cvcli-shell")).toBeTruthy();
     expect(host.querySelector(".cvcli-viewport")?.getAttribute("data-theme")).toBe("dark");
