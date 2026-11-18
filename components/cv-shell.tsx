@@ -232,7 +232,7 @@ export default function CvShell() {
 
               {mode === "guided" && (!sessionActive || showCommandPalette) && (
                 <div className="cvcli-guided" id="cvcli-guided-panel">
-                  <div className="cvcli-group-label">// QUICK COMMANDS · CLICK TO RUN</div>
+                  <div className="cvcli-group-label">{"// QUICK COMMANDS · CLICK TO RUN"}</div>
                   <div className="cvcli-command-grid">
                     {GUIDED_COMMANDS.map((item) => (
                       <button type="button" key={item.command} title={item.command} onClick={() => execute(item.command)} className="cvcli-action">
