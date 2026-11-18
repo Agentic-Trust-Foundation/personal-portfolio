@@ -1,0 +1,255 @@
+{
+  "name": "Hossein Mohammaddokht",
+  "role": "DevOps & Platform Engineer",
+  "focus": "API Management · AI Systems Engineering",
+  "location": "Tehran, Iran",
+  "email": "mohammaddokht@gmail.com",
+  "phone": "+98 935 228 0112",
+  "github": "Mohammaddokht",
+  "githubUrl": "https://github.com/Mohammaddokht",
+  "linkedin": "mohamaddokht",
+  "linkedinUrl": "https://www.linkedin.com/in/mohamaddokht/",
+  "introduction": "I've spent most of my career working with Linux, networking, servers, and production systems. In recent years, my work has focused on DevOps, Kubernetes, API gateways, API management, and troubleshooting financial applications.",
+  "direction": "I'm now building my own software products, moving toward AI Systems & Platform Engineering and infrastructure for AI agents. I work across development and operations, often tracing issues from the application down to the infrastructure.",
+  "skills": [
+    {
+      "id": "api",
+      "title": "API Platforms",
+      "items": [
+        "API Gateways",
+        "API Management",
+        "REST APIs",
+        "Service Integration",
+        "Troubleshooting"
+      ]
+    },
+    {
+      "id": "infra",
+      "title": "Infrastructure & Cloud",
+      "items": [
+        "Linux",
+        "Networking",
+        "Docker",
+        "Kubernetes",
+        "AWS",
+        "Nginx",
+        "Traefik"
+      ]
+    },
+    {
+      "id": "devops",
+      "title": "DevOps & Automation",
+      "items": [
+        "CI/CD",
+        "GitHub Actions",
+        "GitLab CI",
+        "Argo CD",
+        "Ansible",
+        "Terraform",
+        "OpenTofu"
+      ]
+    },
+    {
+      "id": "data",
+      "title": "Monitoring & Data",
+      "items": [
+        "Prometheus",
+        "Grafana",
+        "ELK",
+        "PostgreSQL",
+        "PostGIS",
+        "MinIO",
+        "Nexus"
+      ]
+    },
+    {
+      "id": "code",
+      "title": "Scripting & Testing",
+      "items": [
+        "Python",
+        "Bash",
+        "Go (Basic)",
+        "API Testing",
+        "Integration Testing",
+        "Java Application Troubleshooting"
+      ]
+    }
+  ],
+  "experience": [
+    {
+      "id": "independent",
+      "title": "Independent Product & Platform Engineer",
+      "company": "Personal Projects",
+      "dates": "Late 2026 – Present",
+      "location": "Tehran, Iran",
+      "summary": "Working on AgentWallet, Atlas, and Kuhban, alongside their supporting infrastructure.",
+      "bullets": [
+        "Working on three independent products with a focus on backend services, infrastructure, API design, testing, and deployment.",
+        "Setting up and maintaining Docker-based environments, databases, CI/CD workflows, and supporting services.",
+        "Working toward practical AI and agent-based features in these products."
+      ]
+    },
+    {
+      "id": "algoritm",
+      "title": "DevOps Engineer (API Platforms)",
+      "company": "Algoritm Co. — SAAD Holding",
+      "dates": "Jun 2025 – 2026",
+      "location": "Tehran, Iran",
+      "summary": "API gateways, API management, Kubernetes, and troubleshooting financial applications.",
+      "bullets": [
+        "Worked mainly on API gateway and API management systems: deployment, configuration, API policies, integration issues, and day-to-day troubleshooting.",
+        "Maintained API management services on Kubernetes and investigated issues between applications, gateways, and backend services.",
+        "Supported financial applications, including Apache Fineract, and troubleshot Java-based services and integration problems.",
+        "Tested application behavior, checked logs and API responses, and worked with developers to find and fix issues."
+      ]
+    },
+    {
+      "id": "mobtakeran",
+      "title": "DevOps Engineer",
+      "company": "Mobtakeran Publishing",
+      "dates": "Jul 2019 – May 2025",
+      "location": "Tehran, Iran",
+      "summary": "Linux infrastructure, reverse proxies, deployments, and application architecture.",
+      "bullets": [
+        "Moved parts of the infrastructure from Windows/IIS to Linux-based environments.",
+        "Configured and maintained reverse proxies, mainly Nginx and Traefik, for application routing and access.",
+        "Helped move applications from a monolithic setup toward microservices and supported the launch of the Mobedu e-commerce platform.",
+        "Worked on Linux servers, troubleshooting, application deployments, and system reliability."
+      ]
+    },
+    {
+      "id": "freelance",
+      "title": "Freelance Network & Data Center Engineer",
+      "company": "Independent / Client Projects",
+      "dates": "Feb 2017 – Jun 2019",
+      "location": "Iran",
+      "summary": "Network infrastructure, servers, virtualization, and firewalls for small businesses.",
+      "bullets": [
+        "Built and maintained networks, servers, virtualization environments, and firewall configurations for small businesses.",
+        "Helped clients troubleshoot infrastructure and connectivity problems."
+      ]
+    },
+    {
+      "id": "fankash",
+      "title": "Project Manager & Network Engineer",
+      "company": "Fankash (Tehran Municipality Employees IT)",
+      "dates": "Aug 2015 – Dec 2017",
+      "location": "Iran",
+      "summary": "Data center and network infrastructure operations.",
+      "bullets": [
+        "Maintained data center servers and network infrastructure, including monitoring and security tools.",
+        "Worked on network security, system availability, and Linux/Windows environments."
+      ]
+    },
+    {
+      "id": "early",
+      "title": "Technical Engineer & Help Desk",
+      "company": "MIDCO / Noran Co. / REMIS Co.",
+      "dates": "Jan 2009 – Aug 2015",
+      "location": "Iran",
+      "summary": "Technical support and network maintenance.",
+      "bullets": [
+        "Provided technical support, network troubleshooting, and IT systems maintenance across multiple companies."
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "id": "agentwallet",
+      "name": "AgentWallet",
+      "title": "AI Agent Authorization & Transaction Platform",
+      "status": "In development",
+      "short": "Permissioned actions and traceable transactions for AI agents.",
+      "description": "A platform where AI agents can request services and prepare actions on behalf of users, with clear permission limits and confirmation for sensitive steps.",
+      "bullets": [
+        "Working on agent and user authorization, permissions, and controlled workflows.",
+        "Exploring test wallet balances, orders, receipts, and auditable transactions in a development environment.",
+        "Not presented as a live financial service."
+      ],
+      "tags": [
+        "Agentic AI",
+        "Authorization",
+        "API Integration",
+        "Auditability"
+      ]
+    },
+    {
+      "id": "atlas",
+      "name": "Atlas",
+      "title": "Regional Intelligence & Tourism Platform",
+      "status": "In development",
+      "short": "Geographic and tourism data, with planned AI-assisted discovery.",
+      "description": "A location-based platform bringing geographic and tourism data together for discovery, research, and tour-guide workflows.",
+      "bullets": [
+        "Working on source-aware data integration, review tools, APIs, and map-based exploration.",
+        "Planning AI-assisted search and itinerary features while keeping reviewed geographic data separate from generated suggestions."
+      ],
+      "tags": [
+        "Geospatial",
+        "Data Integration",
+        "Tourism",
+        "AI Roadmap"
+      ]
+    },
+    {
+      "id": "kuhban",
+      "name": "Kuhban",
+      "title": "Outdoor Route & Decision-Support Platform",
+      "status": "In development",
+      "short": "Evidence-backed route information and outdoor decision support.",
+      "description": "A route discovery and information platform that uses geographic data and supporting evidence to help people evaluate outdoor routes.",
+      "bullets": [
+        "Working on data processing, APIs, route management, mobile/admin flows, and deployment infrastructure.",
+        "AI-assisted analysis is part of the product direction; route decisions remain with the user."
+      ],
+      "tags": [
+        "PostGIS",
+        "Data Pipelines",
+        "Route Discovery",
+        "AI Roadmap"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "title": "Bachelor's Degree, Hardware & Network Technology",
+      "school": "Jahad Daneshgahi Sanati Sharif",
+      "dates": "2008–2011",
+      "location": "Tehran"
+    },
+    {
+      "title": "Associate Degree, Computer Hardware",
+      "school": "Gostaresh Anformatic Iran",
+      "dates": "2005–2008",
+      "location": "Tehran"
+    },
+    {
+      "title": "Diploma, Mathematics & Physics",
+      "school": "Shahid Hosseini Nejad",
+      "dates": "2000–2003",
+      "location": "Tehran"
+    }
+  ],
+  "training": [
+    "AWS Cloud Practitioner Essentials (2025)",
+    "DevOps Administration (2024)",
+    "VMware vSphere (2015)",
+    "CCNP & CCNA (2013)",
+    "CWNA (2013)",
+    "PMP / Agile / Scrum coursework — University of Tehran (2017)"
+  ],
+  "languages": [
+    {
+      "name": "Persian",
+      "level": "Native"
+    },
+    {
+      "name": "English",
+      "level": "Full Professional Proficiency"
+    },
+    {
+      "name": "French",
+      "level": "Basic"
+    }
+  ]
+}
