@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, MapPin, Smartphone, Linkedin } from "lucide-react";
+import { Mail, MapPin, Smartphone } from "lucide-react";
 import { profile, type Experience, type Project } from "@/content/profile";
 import "./novoresume.css";
 
@@ -69,7 +69,7 @@ export default function ResumePage() {
                 <a className="ncv-contact-line" href={`mailto:${profile.email}`}><Mail className="ncv-contact-icon" aria-hidden="true" /><span>{profile.email}</span></a>
                 <a className="ncv-contact-line" href={`tel:${profile.phone.replace(/[^\d+]/g, "")}`}><Smartphone className="ncv-contact-icon" aria-hidden="true" /><span>{profile.phone}</span></a>
                 <div className="ncv-contact-line"><MapPin className="ncv-contact-icon" aria-hidden="true" /><span>{profile.location}</span></div>
-                <a className="ncv-contact-line" href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer"><Linkedin className="ncv-contact-icon" aria-hidden="true" /><span>{profile.linkedin}</span></a>
+                <a className="ncv-contact-line" href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer"><svg className="ncv-contact-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg><span>{profile.linkedin}</span></a>
               </div>
             </header>
             <section className="ncv-section" aria-labelledby="ncv-skills">
