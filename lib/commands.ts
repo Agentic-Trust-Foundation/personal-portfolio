@@ -14,7 +14,7 @@ export interface CommandResult {
 }
 
 export const ALLOWED_COMMANDS = [
-  "cv", "cv help", "cv about", "cv skills", "cv skills -v",
+  "cv", "cv help", "cv about", "cv skill", "cv skill -v", "cv skills", "cv skills -v",
   "cv work", "cv work -v", "cv work --company algoritm",
   "cv projects", "cv projects agentwallet", "cv projects agentwallet -v",
   "cv projects atlas", "cv projects atlas -v",
@@ -85,7 +85,7 @@ export function executeCommand(input: string): CommandResult {
   if ((verb === "help" || verb === "--help") && noArgs) {
     return output("Available CV commands", [
       "cv about                   About me",
-      "cv skills       [-v]        Skills / full skill list",
+      "cv skill[s]    [-v]        Skills / full skill list",
       "cv work         [-v]        Work experience / detailed responsibilities",
       "cv work --company <name>    One employer (algoritm, mobtakeran, etc.)",
       "cv projects                 Personal projects",
@@ -104,7 +104,7 @@ export function executeCommand(input: string): CommandResult {
   if (verb === "about" && noArgs) {
     return output(profile.name, [profile.role + " | " + profile.focus, "", profile.introduction, "", profile.direction], ["cv work", "cv projects"]);
   }
-  if (verb === "skills" && (noArgs || verbose)) {
+  if ((verb === "skills" || verb === "skill") && (noArgs || verbose)) {
     return output("Technical skills", profile.skills.map((group) =>
       verbose ? `${group.title}\n  ${group.items.join(" · ")}` : `${group.title}: ${group.items.slice(0, 4).join(" · ")}`
     ), verbose ? ["cv work -v"] : ["cv skills -v", "cv work"]);
