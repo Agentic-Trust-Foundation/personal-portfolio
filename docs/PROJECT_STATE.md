@@ -10,7 +10,7 @@
 - Ask visitors if they have used Bash; guided commands vs expert prompt.
 - Strict `cv` command grammar. No OS commands, Bash, REPL, external CLI, or execution bridge.
 - Downloads are PDF only (`cv download`), never DOCX.
-- Source of truth is `content/profile.ts`. Do not imply AI roadmap features are already live.
+- Source of truth is `content/profile.json`. Do not imply AI roadmap features are already live.
 - Keep public HTML resume available for non-technical visitors and search engines.
 
 ## Implemented
@@ -38,10 +38,10 @@ GitHub repository is currently private. The Vercel connector's Git context retur
 
 ## Next actions
 
-Complete PDF, run CI/build, inspect failure logs and fix, connect Git repository to Vercel where permissions allow, verify a preview, then close release checks.
+Confirm Vercel team authorization, connect the Git repository when approved, deploy and inspect desktop/mobile and PDF downloading. Confirm contact links and exact Algoritm end date before public promotion.
 
 ## Latest verified code
 
-- Head commit: `ad605a2a4f4654523897752323235c3e93217f56` (correct verbose project autocomplete whitelist)
+- Latest tested code commit: `ad605a2a4f4654523897752323235c3e93217f56` (correct verbose project autocomplete whitelist)
 - GitHub Actions run `44311730444`: success; includes unit, interaction, lint, build and PDF file checks
 - Vercel team scope `ardindokhts-projects` returned 403 and requires user approval; a one-time authorization link was provided in the chat

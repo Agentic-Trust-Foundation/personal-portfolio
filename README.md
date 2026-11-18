@@ -61,6 +61,7 @@ Current GitHub CI validates unit and interaction tests, lint, static build and P
 
 ## Edit content
 
+- `content/profile.json` — canonical source of truth for the terminal, resume page and generated PDF.
 - `content/profile.ts` — typed access to the canonical resume model.
 - `lib/commands.ts` — strict command parser; do not connect to an OS shell.
 - `components/terminal.tsx` — terminal interactions and guided/expert modes.
