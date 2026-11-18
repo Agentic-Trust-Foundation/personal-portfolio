@@ -101,3 +101,12 @@ Confirm Vercel team authorization, connect the Git repository when approved, dep
 - Terminal startup collapse increased from 580 ms to 1080 ms; prompt scrolling now uses a paced 1220 ms animation rather than browser-dependent native smooth timing. A short initial delay improves the transition and prefers-reduced-motion remains respected.
 - The one-time PDF refresh workflow is removed after producing the asset, so normal lightweight portfolio CI remains the standard gate.
 - Production release status must be recorded only after main CI and Vercel production verification.
+
+## Oneko cursor companion — 2026-11-19 (pending release verification)
+
+- Commands: `cv play oneko` turns on, `cv play oneko off` turns off. Listed under `cv help` Bonus beside Snake; never added to the main guided CV command menu.
+- A pixel cat follows the mouse anywhere on this **website**, not only in the terminal. The original `oneko.gif` sprite and directional frame offsets are attributed to adryd325/oneko.js (MIT, full license at `licenses/oneko-js-MIT.txt`). The mouse-pointer SVG is newly drawn for this portfolio.
+- Global Next.js layout mounts the client companion on the homepage and on `/resume/`, using `sessionStorage` to preserve activation within the same browser tab. It does not track activity, contact any backend, or operate outside this domain.
+- Transparent pet overlay uses `pointer-events:none`; visible dismiss button or `cv play oneko off` restores the original cursor. Text inputs retain an I-beam cursor.
+- Motion is disabled for touch-only and prefers-reduced-motion environments and while the full-screen Snake game is open.
+- Add release SHA, GitHub Actions evidence, Vercel Preview and HTTP checks only after those steps actually pass.

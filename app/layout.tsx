@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { profile } from "@/content/profile";
+import OnekoCompanion from "@/components/oneko-companion";
 import "./globals.css";
 import "./portfolio.css";
+import "./oneko.css";
 
 export const viewport: Viewport = { themeColor: "#0b1016", width: "device-width", initialScale: 1 };
 
@@ -22,7 +24,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>{children}<OnekoCompanion /></body>
     </html>
   );
 }

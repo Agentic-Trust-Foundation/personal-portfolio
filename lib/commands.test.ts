@@ -11,6 +11,25 @@ describe("CV-only terminal commands", () => {
     expect(GUIDED_EXTRA_COMMANDS.some((item) => item.command === "cv play snake")).toBe(false);
     expect(ALLOWED_COMMANDS).toContain("cv play snake");
   });
+  it("makes Oneko discoverable as an optional fun command without a guided button", () => {
+    const help = executeCommand("cv help").lines.join(" ");
+    expect(help).toContain("cv play oneko");
+    expect(help).toContain("cv play oneko off");
+    expect(GUIDED_COMMANDS.some((item) => item.command.includes("oneko"))).toBe(false);
+    expect(GUIDED_EXTRA_COMMANDS.some((item) => item.command.includes("oneko"))).toBe(false);
+    expect(ALLOWED_COMMANDS).toContain("cv play oneko");
+  });
+  it("only toggles the Oneko companion for exact approved commands", () => {
+    const enabled = executeCommand("cv play oneko");
+    expect(enabled.type).toBe("companion");
+    expect(enabled.companion).toBe("start");
+    const disabled = executeCommand("cv play oneko off");
+    expect(disabled.type).toBe("companion");
+    expect(disabled.companion).toBe("stop");
+    for (const invalid of ["oneko", "cv oneko", "cv play oneko ls", "cv play oneko --exec", "cv play oneko off; ls"]) {
+      expect(executeCommand(invalid).type).toBe("error");
+    }
+  });
   it("allows only the exact Snake command, never arbitrary game or OS commands", () => {
     expect(executeCommand("cv play snake").type).toBe("game");
     expect(executeCommand(" CV  PLAY  SNAKE ").type).toBe("game");

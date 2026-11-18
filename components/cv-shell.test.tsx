@@ -66,6 +66,40 @@ describe("Terminal-first CV interaction", () => {
     expect(host.querySelector(".cvcli-viewport")?.classList.contains("cvcli-game-mode")).toBe(false);
     expect(host.textContent).toContain("Back to CV");
   });
+  it("enables and disables Oneko without launching a full-screen game", async () => {
+    await click("Yes, I have");
+    const observed: boolean[] = [];
+    const listener = (event: Event) => observed.push((event as CustomEvent<{ enabled: boolean }>).detail.enabled);
+    window.addEventListener("cv:oneko", listener);
+    const input = host.querySelector("#cvcli-command") as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+    if (!setter) throw new Error("Missing native value setter");
+    const run = async (command: string) => {
+      const activeInput = host.querySelector("#cvcli-command") as HTMLInputElement;
+      await act(async () => {
+        setter.call(activeInput, command);
+        activeInput.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      await act(async () => {
+        host.querySelector<HTMLFormElement>(".cvcli-form")?.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true })
+        );
+      });
+    };
+    try {
+      await run("cv play oneko");
+      expect(observed).toEqual([true]);
+      expect(host.querySelector(".cvcli-game-slot")).toBeNull();
+      expect(host.textContent).toContain("Oneko is here");
+      await run("cv play oneko off");
+      expect(observed).toEqual([true, false]);
+      expect(host.textContent).toContain("Oneko stopped");
+      expect(host.querySelector("#cvcli-command")).toBeTruthy();
+    } finally {
+      window.removeEventListener("cv:oneko", listener);
+    }
+  });
+
   it("makes hidden extras discoverable through a small Help control, not the guided menu", async () => {
     await click("Yes, I have");
     await click("HELP + EXTRAS");
