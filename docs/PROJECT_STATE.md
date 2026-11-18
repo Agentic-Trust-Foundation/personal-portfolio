@@ -79,3 +79,17 @@ Confirm Vercel team authorization, connect the Git repository when approved, dep
 - Home hero now emphasizes API Management / Platform Engineering / Agentic AI, not Infrastructure as a headline.
 - Vercel Git integration is now linked to `Agentic-Trust-Foundation/personal-portfolio`, confirmed in Vercel deployment context. PR preview and CI must pass before merging to main.
 - Future updates to `content/profile.json` require regenerating the tracked `public/cv.html` and `public/resume.pdf` by running `python scripts/render_resume.py --root . --html public/cv.html --pdf public/resume.pdf --previews .cv-render`. Vercel requires no Python backend.
+
+## Terminal-first clear-screen release — 2026-11-18
+
+- Requested outcome: the homepage itself is a terminal, not a marketing hero with a terminal widget.
+- New opening state: full-window CV CLI, name and role, plus a Bash experience question.
+- First non-empty typed input, Tab completion or guided command click dismisses the startup banner and onboarding text immediately; typed input and focus are preserved.
+- In guided mode, click-to-run command cards collapse on the first command and can be reopened using a compact **Commands** toggle. In expert mode only a prompt and minimal help remain.
+- Command outputs append as terminal history; `cv clear` and Ctrl+L clear history while keeping the session open.
+- CV-only command parser and routes `/resume/`, `/cv.html`, `/resume.pdf` remain unchanged. No real shell or backend.
+- Code PR: https://github.com/Agentic-Trust-Foundation/personal-portfolio/pull/2; merged code SHA `e79469a489bd0d734abe60554c5f2815b5d0db1b`.
+- GitHub Actions run `44370558933`: SUCCESS, unit and interaction tests (22 total), lint, static build and PDF output checks.
+- Vercel production deployment `dpl_5E9N1mv4daQ69gxipkWBL9iaTVPk`: READY on `https://personal-portfolio-ardindokhts-projects.vercel.app`.
+- HTTP verified `/`, `/resume/`, `/resume.pdf`, `/cv.html`: all HTTP 200; homepage includes terminal onboarding and no legacy marketing hero.
+- Browser UX: automated component tests cover the first typed character, focus preservation, guided click clearing, palette reopening and `cv clear`; final human visual review remains a normal design-iteration step.
