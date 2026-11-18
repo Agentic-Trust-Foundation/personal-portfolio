@@ -58,7 +58,8 @@ describe("Terminal-first CV interaction", () => {
   it("smoothly scrolls to the prompt after expert mode selection", async () => {
     await click("Yes, I have");
     await act(async () => { await new Promise((resolve) => setTimeout(resolve, 20)); });
-    expect(host.textContent).toContain("TERMINAL MODE");
+    expect(host.textContent).toContain("EXPERT MODE");
+    expect(host.textContent).toContain("Terminal mode ready.");
     expect(scrollSpy).toHaveBeenCalled();
     expect(scrollSpy.mock.calls.some(([options]) => options.behavior === "smooth")).toBe(true);
     expect(host.querySelector("#cvcli-command")).toBeTruthy();
