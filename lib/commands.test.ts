@@ -3,6 +3,21 @@ import { ALLOWED_COMMANDS, GUIDED_COMMANDS, GUIDED_EXTRA_COMMANDS, executeComman
 import { profile } from "../content/profile";
 
 describe("CV-only terminal commands", () => {
+  it("keeps the Snake Easter egg off the normal help and guided commands", () => {
+    const help = executeCommand("cv help");
+    expect(help.lines.join(" ")).toContain("Not everything in this terminal is about work.");
+    expect(help.lines.join(" ")).not.toContain("cv play snake");
+    expect(GUIDED_COMMANDS.some((item) => item.command === "cv play snake")).toBe(false);
+    expect(GUIDED_EXTRA_COMMANDS.some((item) => item.command === "cv play snake")).toBe(false);
+    expect(ALLOWED_COMMANDS).toContain("cv play snake");
+  });
+  it("allows only the exact Snake command, never arbitrary game or OS commands", () => {
+    expect(executeCommand("cv play snake").type).toBe("game");
+    expect(executeCommand(" CV  PLAY  SNAKE ").type).toBe("game");
+    for (const invalid of ["snake", "cv play", "cv play minesweeper", "cv play snake --exec", "cv play snake; ls"]) {
+      expect(executeCommand(invalid).type).toBe("error");
+    }
+  });
   it("lists German at Basic level and keeps DevSecOps training current", () => {
     const languages = executeCommand("cv languages");
     expect(languages.lines.join(" ")).toContain("German — Basic");

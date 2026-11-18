@@ -6,7 +6,7 @@ import { profile, type Experience, type Project } from "@/content/profile";
  * networking, filesystem access, or free-form code execution is involved.
  */
 export interface CommandResult {
-  type: "output" | "download" | "clear" | "error";
+  type: "output" | "download" | "clear" | "error" | "game";
   title?: string;
   lines: string[];
   suggestions?: string[];
@@ -19,7 +19,7 @@ export const ALLOWED_COMMANDS = [
   "cv projects", "cv projects agentwallet", "cv projects agentwallet -v",
   "cv projects atlas", "cv projects atlas -v",
   "cv projects kuhban", "cv projects kuhban -v", "cv education", "cv certs", "cv languages",
-  "cv contact", "cv resume", "cv download", "cv clear",
+  "cv contact", "cv resume", "cv download", "cv clear", "cv play snake",
 ] as const;
 
 export const GUIDED_COMMANDS = [
@@ -99,6 +99,8 @@ export function executeCommand(input: string): CommandResult {
       "cv clear                    Clear terminal history",
       "",
       "Only cv commands work here. Tab completes a command; ↑ / ↓ browse history.",
+      "",
+      "Tip: Not everything in this terminal is about work.",
     ], ["cv about", "cv skills", "cv work", "cv projects"]);
   }
   if (verb === "about" && noArgs) {
@@ -159,6 +161,9 @@ export function executeCommand(input: string): CommandResult {
     lines: ["Starting PDF download. You can also use the direct link below."],
     link: { href: "/resume.pdf", label: "Download resume.pdf", download: true },
   };
+  if (verb === "play" && rest.length === 1 && rest[0] === "snake") {
+    return { type: "game", title: "CV Snake", lines: ["Snake running. Press Esc to return to your CV."] };
+  }
   if (verb === "clear" && noArgs) return { type: "clear", lines: [] };
   return error("Unsupported cv command or arguments.");
 }
