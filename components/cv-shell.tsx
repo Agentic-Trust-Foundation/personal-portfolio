@@ -64,12 +64,16 @@ export default function CvShell() {
   // Keep the default dark appearance close to the supplied P.CV screenshot.
   // Remember an explicitly selected light theme without affecting the resume page.
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(THEME_KEY);
-      if (stored === "light" || stored === "dark") setTheme(stored);
-    } catch {
-      // Browsers with storage blocked still support the in-session toggle.
-    }
+    // Restore the visitor's preference after hydration; keep server markup stable.
+    const frame = window.requestAnimationFrame(() => {
+      try {
+        const stored = window.localStorage.getItem(THEME_KEY);
+        if (stored === "light" || stored === "dark") setTheme(stored);
+      } catch {
+        // Browsers with storage blocked still support the in-session toggle.
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   useEffect(() => {
@@ -255,7 +259,7 @@ export default function CvShell() {
 
   const guidedMenu = (
     <div className="cvcli-guided" id="cvcli-guided-panel" ref={guidedRef}>
-      <div className="cvcli-group-label">// QUICK COMMANDS · CLICK TO RUN</div>
+      <div className="cvcli-group-label">{"// QUICK COMMANDS · CLICK TO RUN"}</div>
       <div className="cvcli-command-grid">
         {GUIDED_COMMANDS.map((item) => (
           <button type="button" key={item.command} title={item.command}
