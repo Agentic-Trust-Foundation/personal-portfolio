@@ -57,16 +57,16 @@ pnpm build
 3. Deploy `main` as the production branch; previews can use pull requests. No environment variables are required.
 4. Before promoting publicly, verify the PDF, names, dates, email and contact links.
 
-No Vercel project or domain is implied by this repository; the live URL is recorded only when actually deployed.
+Current GitHub CI validates unit and interaction tests, lint, static build and PDF integrity. No live Vercel URL is claimed until deployment succeeds.
 
 ## Edit content
 
-- `content/profile.ts` — one source of truth for the resume, projects and commands.
+- `content/profile.ts` — typed access to the canonical resume model.
 - `lib/commands.ts` — strict command parser; do not connect to an OS shell.
 - `components/terminal.tsx` — terminal interactions and guided/expert modes.
 - `app/resume/page.tsx` — complete accessible HTML resume.
 - `app/portfolio.css` — responsive styling.
-- `public/resume.pdf` — distributable PDF. Regenerate whenever the profile changes.
+- `scripts/generate-resume-pdf.mjs` — regenerates `public/resume.pdf` from canonical JSON on every build.
 
 See [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) for implementation checklist, release gates, and unresolved verification.
 
