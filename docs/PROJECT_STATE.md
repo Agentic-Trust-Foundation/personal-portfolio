@@ -93,3 +93,11 @@ Confirm Vercel team authorization, connect the Git repository when approved, dep
 - Vercel production deployment `dpl_5E9N1mv4daQ69gxipkWBL9iaTVPk`: READY on `https://personal-portfolio-ardindokhts-projects.vercel.app`.
 - HTTP verified `/`, `/resume/`, `/resume.pdf`, `/cv.html`: all HTTP 200; homepage includes terminal onboarding and no legacy marketing hero.
 - Browser UX: automated component tests cover the first typed character, focus preservation, guided click clearing, palette reopening and `cv clear`; final human visual review remains a normal design-iteration step.
+
+## Small CV and terminal refinement — 2026-11-18
+
+- Canonical training and static HTML now use **DevSecOps Training (2026)**; the longer "final session Nov 20" text is intentionally removed.
+- The checked-in A4 PDF was updated at the original text location using Open Sans Bold; a one-off CI run verified it remains two pages and the new label is searchable while the old label is absent.
+- Terminal startup collapse increased from 580 ms to 1080 ms; prompt scrolling now uses a paced 1220 ms animation rather than browser-dependent native smooth timing. A short initial delay improves the transition and prefers-reduced-motion remains respected.
+- The one-time PDF refresh workflow is removed after producing the asset, so normal lightweight portfolio CI remains the standard gate.
+- Production release status must be recorded only after main CI and Vercel production verification.
