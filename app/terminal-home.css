@@ -1,0 +1,161 @@
+/* Immersive CLI landing. The normal Novorésumé CV stays in /resume/ untouched. */
+.cvcli-viewport {
+  --cli-bg: #070c12;
+  --cli-panel: #0b131c;
+  --cli-top: #131e29;
+  --cli-line: #2c404c;
+  --cli-text: #d6e2e5;
+  --cli-muted: #8095a3;
+  --cli-highlight: #a1e9be;
+  --cli-amber: #e1bc84;
+  box-sizing: border-box;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  padding: clamp(8px, 2.6vh, 27px) clamp(8px, 2.2vw, 32px) 12px;
+  color: var(--cli-text);
+  background: radial-gradient(ellipse 50% 45% at 75% 15%, #122635 0%, transparent 100%), #070c12;
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", "DejaVu Sans Mono", monospace;
+}
+.cvcli-viewport *, .cvcli-viewport *::before, .cvcli-viewport *::after { box-sizing: border-box; }
+.cvcli-viewport a { color: inherit; }
+.cvcli-viewport button, .cvcli-viewport input { font-family: inherit; }
+.cvcli-viewport button { cursor: pointer; }
+.cvcli-viewport button:disabled { cursor: not-allowed; }
+.cvcli-viewport :focus-visible { outline: 2px solid var(--cli-highlight); outline-offset: 3px; }
+.cvcli-skip { position: absolute; left: 18px; top:-80px; z-index: 99; padding:10px; color:black!important; background:white; }
+.cvcli-skip:focus { top:10px; }
+.cvcli-shell {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 64px);
+  min-height: 530px;
+  width: min(1300px, 100%);
+  margin: 0 auto;
+  border: 1px solid #355061;
+  border-radius: 12px;
+  background: var(--cli-panel);
+  box-shadow: 0 0 0 1px #ffffff0a inset, 0 24px 80px #0009, 0 0 100px #183e511c;
+  overflow: hidden;
+  isolation: isolate;
+}
+.cvcli-header {
+  position: relative;
+  flex: none;
+  display:flex;
+  align-items: center;
+  justify-content:space-between;
+  min-height: 48px;
+  border-bottom: 1px solid var(--cli-line);
+  background: linear-gradient(180deg, #17232f, var(--cli-top));
+  color: #aabac6;
+  padding: 0 clamp(14px,2vw,25px);
+  font-size: 11px;
+  letter-spacing: .025em;
+  user-select:none;
+}
+.cvcli-top-left { display:flex; align-items:center; gap:18px; min-width:0; }
+.cvcli-window-dots { display:flex; gap:7px; flex:none; }
+.cvcli-window-dots i { width:10px; height:10px; border-radius:50%; display:block; background:#d57d7e; }
+.cvcli-window-dots i:nth-child(2) { background:#d9b86b; }
+.cvcli-window-dots i:nth-child(3) { background:#7cc2a2; }
+.cvcli-header-divider { height:15px; border-left:1px solid #405665; }
+.cvcli-tab { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cvcli-tab-symbol { color:var(--cli-highlight); margin-right:5px; }
+.cvcli-utilities { display:flex; gap:9px; flex:none; }
+.cvcli-utilities a { border:1px solid #4d6471; border-radius:4px; padding:7px 12px; text-decoration:none; font-size:10px; }
+.cvcli-utilities a:hover { background:#243a42; color:var(--cli-highlight); }
+.cvcli-console {
+  position:relative;
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  scroll-behavior:smooth;
+  padding: clamp(22px,3vw,40px) clamp(14px,4.2vw,67px) 38px;
+  background:
+    linear-gradient(to bottom, transparent 98%, #b4d4cb06 99%) 0 0/100% 4px,
+    linear-gradient(150deg, #12232e24, transparent 55%);
+  scrollbar-color:#355061 transparent;
+  scrollbar-width:thin;
+}
+.cvcli-boot { padding:0 0 28px; max-width:980px; }
+.cvcli-boot-bar { display:flex; flex-wrap:wrap; gap:13px; align-items:center; font-size:10px; letter-spacing:.09em; color:#7894a4; }
+.cvcli-boot-bar span:first-child { color:var(--cli-highlight); font-weight:700; }
+.cvcli-boot-name { margin:25px 0 7px; font-size:clamp(25px,3.7vw,51px); color:#eef5f0; letter-spacing:-.06em; line-height:1.2; font-weight:700; overflow-wrap:anywhere; }
+.cvcli-caret { color:var(--cli-highlight); animation:cvcli-blink 1.1s step-end infinite; padding-left:2px; }
+@keyframes cvcli-blink { 50% { opacity:0; } }
+.cvcli-boot-role { margin-top:13px; color:#dbe7ed; font-size:clamp(12px,1.25vw,16px); line-height:1.7; }
+.cvcli-boot-focus { color:#87cba9; font-size:12px; margin-top:5px; line-height:1.8; }
+.cvcli-boot-rule { margin-top:20px; color:#314955; height:14px; overflow:hidden; white-space:nowrap; letter-spacing:.05em; }
+.cvcli-input-record { color:#d8e3e9; font-size:13px; margin:0; overflow-wrap:anywhere; white-space:pre-wrap; }
+.cvcli-prompt-mark { color:var(--cli-highlight); padding-right:12px; font-weight:700; }
+.cvcli-note { font-size:12px; line-height:1.85; color:#b4c5ce; margin:14px 0 10px; }
+.cvcli-success { color:var(--cli-highlight); margin-right:7px; }
+.cvcli-onboarding { max-width:850px; margin:5px 0 15px; }
+.cvcli-onboarding h2 { font-size:clamp(17px,2.1vw,24px); line-height:1.6; letter-spacing:-.025em; font-weight:600; color:#f4f1e6; margin:16px 0 23px; }
+.cvcli-onboard-actions { display:grid; gap:11px; max-width:610px; grid-template-columns:1fr 1fr; }
+.cvcli-choice { display:flex; align-items:center; justify-content:space-between; gap:9px; background:#152630; border:1px solid #4a6d70; color:#e5f0eb; border-radius:5px; font-size:12px; padding:16px 13px; text-align:left; transition:background .15s,border-color .15s; }
+.cvcli-choice:hover { background:#214136; border-color:var(--cli-highlight); }
+.cvcli-choice-number { color:var(--cli-highlight); flex:none; }
+.cvcli-choice>span:last-child { color:var(--cli-highlight); }
+.cvcli-muted { color:var(--cli-muted); font-size:12px; line-height:1.8; }
+.cvcli-muted code { background:#1c2d38; color:#b9e8be; border:1px solid #314c47; border-radius:3px; padding:1px 5px; }
+.cvcli-onboard-footnote { padding-top:18px; }
+.cvcli-onboard-footnote a { color:var(--cli-highlight); text-underline-offset:3px; }
+.cvcli-session { max-width:900px; padding-bottom:18px; }
+.cvcli-session .cvcli-note { margin:12px 0 5px; }
+.cvcli-session .cvcli-muted { margin:5px 0; }
+.cvcli-switch { border:0; background:none; color:#8eb8b2; padding:7px 0 5px; text-decoration:underline; text-underline-offset:4px; font-size:11px; }
+.cvcli-switch:hover { color:var(--cli-highlight); }
+.cvcli-guided { max-width:980px; padding:8px 0 15px; }
+.cvcli-group-label { color:#6ca792; font-size:11px; margin-bottom:13px; letter-spacing:.07em; }
+.cvcli-command-grid { display:grid; gap:9px; grid-template-columns:repeat(4,minmax(0,1fr)); }
+.cvcli-action { display:grid; grid-template-columns:1fr auto; grid-template-rows:auto auto; gap:6px; text-align:left; border:1px solid #34505a; background:#111f2a; padding:13px 12px; min-width:0; border-radius:4px; color:#d9e6eb; }
+.cvcli-action:hover { border-color:#84c7a5; background:#1b3540; }
+.cvcli-action-text { grid-column:1/3; font-size:11px; font-weight:600; }
+.cvcli-action code { color:#83c7a7; font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cvcli-action>span:last-child { color:var(--cli-highlight); font-size:11px; }
+.cvcli-more { display:block; border:0; background:none; color:var(--cli-highlight); font-size:11px; padding:14px 0; text-decoration:underline; text-underline-offset:4px; }
+.cvcli-command-grid-more { border-top:1px dashed #31534b; padding-top:16px; }
+.cvcli-history { display:flex; flex-direction:column; gap:22px; padding:16px 0 10px; max-width:980px; }
+.cvcli-turn { padding:0 0 0 2px; }
+.cvcli-turn .cvcli-input-record { margin-bottom:9px; }
+.cvcli-result { padding-left:24px; font-size:12px; line-height:1.85; color:#b8c9d2; }
+.cvcli-result-title { font-weight:700; color:var(--cli-amber); margin:0 0 8px; }
+.cvcli-result-line { white-space:pre-wrap; overflow-wrap:anywhere; }
+.cvcli-error .cvcli-result-title { color:#f59c9c; }
+.cvcli-result-link { margin:11px 0 0; display:inline-block; color:var(--cli-highlight)!important; text-underline-offset:4px; }
+.cvcli-followups { display:flex; flex-wrap:wrap; gap:7px; margin:11px 0 0; }
+.cvcli-followups button { border:1px solid #345b50; border-radius:4px; background:transparent; color:#a9ddc4; font-size:11px; padding:6px 8px; }
+.cvcli-followups button:hover { background:#1d3d30; }
+.cvcli-form { max-width:980px; display:flex; align-items:center; gap:14px; margin-top:14px; border-top:1px dashed #304653; padding:20px 0 5px; }
+.cvcli-form-label { display:flex; align-items:center; gap:0; color:#83c8ae; font-size:12px; white-space:nowrap; }
+.cvcli-form-sep { color:#b8d1d9; }.cvcli-form-dollar { color:#e2d197; margin-left:10px; }
+.cvcli-form input { flex:1; min-width:0; border:0; border-radius:0; background:transparent; color:#f4f7f5; font-size:13px; line-height:1.6; outline:none; caret-color:var(--cli-highlight); }
+.cvcli-form input::placeholder { color:#627b88; }
+.cvcli-form input:focus-visible { outline:none; }
+.cvcli-run { flex:none; font-size:11px; padding:8px 13px; border:1px solid #3e6a56; border-radius:3px; background:#173128; color:var(--cli-highlight); }
+.cvcli-run:hover:not(:disabled) { background:#28533e; }
+.cvcli-run:disabled { opacity:.45; }
+.cvcli-hint { color:var(--cli-amber); font-size:11px; line-height:1.8; margin-left:24px; overflow-wrap:anywhere; }
+.cvcli-status { display:flex; align-items:center; justify-content:space-between; flex:none; min-height:34px; background:#13212a; border-top:1px solid #304553; padding:9px 17px; gap:10px; color:#8dabb5; font-size:10px; letter-spacing:.035em; user-select:none; }
+.cvcli-status-left { color:var(--cli-highlight); white-space:nowrap; }
+.cvcli-status-dot { display:inline-block; width:7px; height:7px; background:var(--cli-highlight); border-radius:50%; margin-right:5px; }
+.cvcli-status-right { text-align:right; white-space:nowrap; }
+.cvcli-below { margin:11px auto 0; width:min(1300px,100%); display:flex; justify-content:space-between; gap:14px; color:#5d7684; font-size:9px; letter-spacing:.08em; }
+@media (max-width:800px) { .cvcli-shell { min-height:calc(100dvh - 48px); height:calc(100dvh - 48px); } .cvcli-console { padding:23px 20px; } .cvcli-command-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .cvcli-status-center { display:none; } }
+@media (max-width:510px) { .cvcli-viewport { padding:5px 5px 8px; } .cvcli-shell { border-radius:7px; min-height:calc(100dvh - 29px); height:calc(100dvh - 29px); } .cvcli-header { min-height:48px; padding:0 10px; gap:8px; } .cvcli-window-dots { gap:4px; } .cvcli-window-dots i { width:8px; height:8px; } .cvcli-top-left { gap:8px; } .cvcli-tab { font-size:10px; } .cvcli-utilities { gap:4px; } .cvcli-utilities a { padding:7px; font-size:10px; } .cvcli-console { padding:22px 15px 28px; } .cvcli-boot { padding-bottom:16px; } .cvcli-boot-name { font-size:clamp(23px,6.2vw,30px); } .cvcli-boot-role { font-size:12px; } .cvcli-boot-focus { font-size:11px; } .cvcli-boot-rule { margin-top:12px; } .cvcli-onboarding h2 { font-size:16px; margin:11px 0 17px; } .cvcli-onboard-actions { grid-template-columns:1fr; gap:8px; } .cvcli-choice { padding:12px; } .cvcli-command-grid { gap:7px; } .cvcli-action { padding:10px 8px; } .cvcli-form { gap:7px; flex-wrap:wrap; } .cvcli-form-label { font-size:10px; } .cvcli-form input { font-size:12px; } .cvcli-status { font-size:9px; padding:9px 11px; } .cvcli-status-right { display:none; } .cvcli-below { font-size:8px; } }
+@media (max-width:340px) { .cvcli-command-grid { grid-template-columns:1fr; } .cvcli-utilities a { font-size:9px; } .cvcli-form-label span:first-child { display:none; } }
+@media (prefers-reduced-motion:reduce) { .cvcli-caret { animation:none; } .cvcli-console { scroll-behavior:auto; } .cvcli-choice { transition:none; } }
+
+.cvcli-enter-hint { color:#729084; font-size:11px; white-space:nowrap; user-select:none; }
+
+/* After the first keystroke or command, only the running CLI remains. */
+.cvcli-viewport.cvcli-engaged .cvcli-console { background: var(--cli-panel); padding-top: clamp(20px, 2.4vw, 32px); }
+.cvcli-viewport.cvcli-engaged .cvcli-history { padding-top: 4px; }
+.cvcli-viewport.cvcli-engaged .cvcli-form { margin-top: 6px; padding-top: 7px; border-top: 0; }
+.cvcli-command-toggle { display: inline-flex; align-items: center; border: 1px solid #355348; border-radius: 3px; padding: 5px 10px; margin: 0 0 12px; background: #0c1d1a; color: var(--cli-highlight); font-size: 11px; }
+.cvcli-command-toggle:hover { background: #18362a; }
+.cvcli-viewport.cvcli-engaged .cvcli-guided { border: 1px solid #2b493d; border-radius: 5px; margin: 0 0 10px; padding: 12px; background: #101d21; }
+.cvcli-status-switch { border: 0; background: transparent; color: #9abfaf; text-decoration: underline; text-underline-offset: 3px; font-size: 10px; cursor: pointer; }
+.cvcli-status-switch:hover { color: var(--cli-highlight); }
