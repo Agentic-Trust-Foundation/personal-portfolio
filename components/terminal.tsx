@@ -114,7 +114,7 @@ export default function Terminal() {
       </div>
       <div className="terminal-console" ref={logRef}>
         <div className="terminal-welcome">
-          <span className="terminal-green">✓</span> connected to <strong>hossein.cv</strong>
+          <span className="terminal-green">✓</span> <strong>CV terminal ready</strong>
           <div className="terminal-small">A safe CV interface. No access to a real system shell.</div>
         </div>
         {mode === null ? (
