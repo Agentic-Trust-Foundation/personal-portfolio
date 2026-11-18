@@ -83,7 +83,7 @@ export default function Terminal() {
         setValue(matches[0]);
         return setHint("");
       }
-      let prefix = matches[0];
+      let prefix: string = matches[0];
       for (const match of matches.slice(1)) {
         while (!match.startsWith(prefix)) prefix = prefix.slice(0, -1);
       }
