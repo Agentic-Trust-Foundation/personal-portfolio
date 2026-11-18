@@ -49,7 +49,13 @@ pnpm lint
 pnpm build
 ```
 
-`pnpm build` generates a **fully static `out/`** directory for deployment.
+`pnpm build` generates a **fully static `out/`** directory for deployment. The two-page styled PDF and self-contained HTML are checked in as `public/resume.pdf` and `public/cv.html`. Regenerate them from `content/profile.json` before changing CV content:
+
+```bash
+python scripts/render_resume.py --root . --html public/cv.html --pdf public/resume.pdf --previews .cv-render
+```
+
+The renderer uses Python Playwright/Chromium and PyMuPDF locally; Vercel only serves static files (no Python backend).
 
 ## Vercel
 
@@ -58,7 +64,7 @@ pnpm build
 3. Deploy `main` as the production branch; previews can use pull requests. No environment variables are required.
 4. Before promoting publicly, verify the PDF, names, dates, email and contact links.
 
-Current GitHub CI validates unit and interaction tests, lint, static build and PDF integrity. No live Vercel URL is claimed until deployment succeeds.
+Current GitHub CI validates unit and interaction tests, lint, static build and PDF integrity. Production URL: https://personal-portfolio-ardindokhts-projects.vercel.app (verify the current deploy and CV asset versions before announcing changes).
 
 ## Edit content
 
@@ -68,7 +74,7 @@ Current GitHub CI validates unit and interaction tests, lint, static build and P
 - `components/terminal.tsx` — terminal interactions and guided/expert modes.
 - `app/resume/page.tsx` — complete accessible HTML resume.
 - `app/portfolio.css` — responsive styling.
-- `scripts/generate-resume-pdf.mjs` — regenerates `public/resume.pdf` from canonical JSON on every build.
+- `scripts/render_resume.py` — regenerates the Novorésumé-style `public/resume.pdf` and `public/cv.html` from canonical JSON on demand.
 
 See [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) for implementation checklist, release gates, and unresolved verification.
 

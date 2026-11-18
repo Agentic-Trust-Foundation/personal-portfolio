@@ -49,7 +49,7 @@ def markup(p):
         +'<section class="ncv-section">'+page_title('Languages')+'<div class="ncv-language-grid">'+langs+'</div></section>'
         +'<section class="ncv-section">'+page_title('Personal Projects')+'<div class="ncv-projects">'+projects+'</div></section>')
     return (f'<div class="ncv-shell"><nav class="ncv-toolbar">'
-            '<a href="#">← Back to terminal</a><div class="ncv-tools">'
+            '<a href="/">← Back to terminal</a><div class="ncv-tools">'
             '<a href="resume.pdf" class="ncv-download" download>Download PDF ↓</a></div></nav>'
             f'<main class="ncv-stack"><div class="ncv-page-frame"><article class="ncv-paper ncv-page1">{p1}{footer(1)}</article></div>'
             f'<div class="ncv-page-frame"><article class="ncv-paper ncv-page2">{p2}{footer(2)}</article></div></main></div>')
