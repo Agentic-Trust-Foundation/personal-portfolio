@@ -1,0 +1,376 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0a0a0a;
+  --bg-elevated: #111111;
+  --border: #1e1e1e;
+  --text: #e6e6e6;
+  --text-dim: #a0a0a0;
+  --muted: #555555;
+  --orange: #ff9e64;
+  --green: #9ece6a;
+  --blue: #7dcfff;
+  --purple: #bb9af7;
+  --red: #f7768e;
+  --yellow: #e0af68;
+  --font-mono-stack:
+    "JetBrains Mono", "SF Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo,
+    "Ubuntu Mono", monospace;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-dim: var(--text-dim);
+  --color-muted: var(--muted);
+  --color-orange: var(--orange);
+  --color-green: var(--green);
+  --color-blue: var(--blue);
+  --color-purple: var(--purple);
+  --color-red: var(--red);
+  --color-yellow: var(--yellow);
+  --font-mono: var(--font-mono-stack);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(125, 207, 255, 0.2);
+  color: #fff;
+}
+
+/* ─── Cursor ─── */
+@keyframes cursorBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink {
+  animation: cursorBlink 1.1s step-end infinite;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* ─── Output fade-in ─── */
+@keyframes outputFade {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.output-fade {
+  animation: outputFade 0.3s ease-out forwards;
+}
+
+/* ─── Subtle glow on colored text ─── */
+.glow-orange {
+  text-shadow: 0 0 12px rgba(255, 158, 100, 0.2);
+}
+.glow-green {
+  text-shadow: 0 0 12px rgba(158, 206, 106, 0.15);
+}
+.glow-blue {
+  text-shadow: 0 0 12px rgba(125, 207, 255, 0.15);
+}
+.glow-purple {
+  text-shadow: 0 0 12px rgba(187, 154, 247, 0.15);
+}
+
+/* ─── Links in terminal output ─── */
+.terminal-link {
+  position: relative;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.terminal-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─── Print styles for resume page ─── */
+@media print {
+  @page {
+    size: A4;
+    margin: 0.38in 0.48in;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+    line-height: 1.4;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  a {
+    text-decoration: none !important;
+    color: inherit !important;
+  }
+}
+
+/* ─── ATS Resume ─── */
+.ats-resume {
+  display: none;
+}
+
+@media print {
+  .ats-resume {
+    display: block !important;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #1a1a1a;
+    background: white;
+    font-size: 8.8pt;
+    line-height: 1.22;
+  }
+
+  .ats-resume * {
+    color: #1a1a1a !important;
+    background: transparent !important;
+    border-color: #ccc !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  .ats-header {
+    text-align: center;
+    border-bottom: 1.4pt solid #1a1a1a;
+    padding-bottom: 5pt;
+    margin-bottom: 7pt;
+  }
+
+  .ats-name {
+    font-size: 17pt;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin: 0 0 2pt 0;
+    text-transform: uppercase;
+  }
+
+  .ats-title {
+    font-size: 9.6pt;
+    font-weight: 600;
+    margin: 0 0 3pt 0;
+    color: #444 !important;
+  }
+
+  .ats-contact {
+    font-size: 8.2pt;
+    color: #555 !important;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 5pt;
+  }
+
+  .ats-contact span {
+    color: #555 !important;
+  }
+
+  .ats-section {
+    margin-bottom: 6pt;
+    break-inside: avoid;
+  }
+
+  .ats-section-title {
+    font-size: 8.8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 0.8pt solid #1a1a1a;
+    padding-bottom: 1.5pt;
+    margin-bottom: 4pt;
+    margin-top: 0;
+  }
+
+  .ats-profile {
+    font-size: 8.8pt;
+    line-height: 1.25;
+    margin: 0;
+  }
+
+  .ats-job {
+    margin-bottom: 5pt;
+    break-inside: avoid;
+  }
+
+  .ats-job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 2pt 12pt;
+  }
+
+  .ats-job-title {
+    font-size: 9pt;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .ats-job-date {
+    font-size: 8.2pt;
+    color: #555 !important;
+    font-style: italic;
+    white-space: nowrap;
+  }
+
+  .ats-job-company {
+    font-size: 8.2pt;
+    color: #444 !important;
+    margin: 0.5pt 0 2pt 0;
+    font-style: italic;
+  }
+
+  .ats-list {
+    margin: 1.5pt 0 2pt 0;
+    padding-left: 11pt;
+    list-style-type: disc;
+  }
+
+  .ats-list li {
+    margin-bottom: 1pt;
+    font-size: 8.5pt;
+    line-height: 1.2;
+  }
+
+  .ats-tech {
+    font-size: 8pt;
+    color: #555 !important;
+    font-style: italic;
+    margin-top: 3pt;
+  }
+
+  .ats-project {
+    margin-bottom: 3pt;
+  }
+
+  .ats-project-name {
+    font-size: 8.8pt;
+    font-weight: 700;
+    margin: 0 0 1pt 0;
+  }
+
+  .ats-project-desc {
+    font-size: 8.5pt;
+    margin: 0 0 1pt 0;
+    line-height: 1.2;
+  }
+
+  .ats-project-line {
+    font-size: 8.5pt;
+    line-height: 1.2;
+    margin: 0 0 2pt 0;
+  }
+
+  .ats-skills-grid p {
+    margin: 1.2pt 0;
+    font-size: 8.4pt;
+    line-height: 1.18;
+  }
+
+  .ats-skills-grid strong {
+    font-weight: 700;
+  }
+
+  .ats-edu {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 2pt 12pt;
+  }
+
+  .ats-edu-degree {
+    font-size: 8.8pt;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .ats-edu-school {
+    font-size: 8.2pt;
+    color: #444 !important;
+    margin: 1pt 0 0 0;
+    font-style: italic;
+  }
+
+  .ats-edu-date {
+    font-size: 8.2pt;
+    color: #555 !important;
+    font-style: italic;
+    white-space: nowrap;
+  }
+
+  .web-resume {
+    display: none !important;
+  }
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .cursor-blink {
+    animation: none;
+    opacity: 1;
+  }
+
+  .output-fade {
+    animation: none;
+    opacity: 1;
+  }
+
+  .glow-orange,
+  .glow-green,
+  .glow-blue,
+  .glow-purple {
+    text-shadow: none;
+  }
+
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
