@@ -21,12 +21,12 @@
 - [x] Interactive terminal with first-visit mode selection and guided buttons
 - [x] Keyboard command history and Tab completion; accessible live output
 - [x] Accessible normal resume page and responsive site design
-- [x] Static export configuration and source-level command unit tests
+- [x] Static export configuration, command unit tests, and guided/expert component interaction tests
 
 ## Release checks (do not claim complete until confirmed)
 
-- [ ] Confirm PDF blob exists and opens as an actual downloadable PDF
-- [ ] Confirm `pnpm test`, `pnpm lint`, and `pnpm build` pass in a runnable environment
+- [x] CI generated a two-page PDF, and static export integrity passed (`out/resume.pdf`, 11,864 bytes); browser download still pending live QA
+- [x] GitHub Actions: unit/interaction tests, lint, TypeScript, static Next.js build and PDF checks all PASS
 - [ ] Browser QA (mobile + desktop, keyboard and download)
 - [ ] Vercel Git integration, preview deploy, smoke test and live URL
 - [ ] Verify any personal contact links and Algoritm end month
@@ -39,3 +39,9 @@ GitHub repository is currently private. The Vercel connector's Git context retur
 ## Next actions
 
 Complete PDF, run CI/build, inspect failure logs and fix, connect Git repository to Vercel where permissions allow, verify a preview, then close release checks.
+
+## Latest verified code
+
+- Head commit: `ad605a2a4f4654523897752323235c3e93217f56` (correct verbose project autocomplete whitelist)
+- GitHub Actions run `44311730444`: success; includes unit, interaction, lint, build and PDF file checks
+- Vercel team scope `ardindokhts-projects` returned 403 and requires user approval; a one-time authorization link was provided in the chat
