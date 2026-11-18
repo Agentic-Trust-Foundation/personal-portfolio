@@ -16,8 +16,9 @@ export interface CommandResult {
 export const ALLOWED_COMMANDS = [
   "cv", "cv help", "cv about", "cv skills", "cv skills -v",
   "cv work", "cv work -v", "cv work --company algoritm",
-  "cv projects", "cv projects agentwallet", "cv projects atlas",
-  "cv projects kuhban", "cv education", "cv certs", "cv languages",
+  "cv projects", "cv projects agentwallet", "cv projects agentwallet -v",
+  "cv projects atlas", "cv projects atlas -v",
+  "cv projects kuhban", "cv projects kuhban -v", "cv education", "cv certs", "cv languages",
   "cv contact", "cv resume", "cv download", "cv clear",
 ] as const;
 
