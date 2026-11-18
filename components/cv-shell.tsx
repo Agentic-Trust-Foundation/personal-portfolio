@@ -25,7 +25,8 @@ type TranscriptLine = {
   result: CommandResult;
 };
 
-const STARTUP_TRANSITION_MS = 580;
+const STARTUP_TRANSITION_MS = 1080;
+const PROMPT_SCROLL_MS = 1220;
 const THEME_KEY = "hossein-cv-terminal-theme";
 
 const EXTENDED_COMMANDS = [
@@ -60,6 +61,7 @@ export default function CvShell() {
   const guidedRef = useRef<HTMLDivElement>(null);
   const lineId = useRef(0);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollAnimationFrame = useRef<number | null>(null);
 
   // Keep the default dark appearance close to the supplied P.CV screenshot.
   // Remember an explicitly selected light theme without affecting the resume page.
@@ -79,16 +81,10 @@ export default function CvShell() {
   useEffect(() => {
     return () => {
       if (closeTimer.current) clearTimeout(closeTimer.current);
+      if (scrollAnimationFrame.current !== null) {
+        window.cancelAnimationFrame(scrollAnimationFrame.current);
+      }
     };
-  }, []);
-
-  const nextFrame = useCallback((callback: () => void) => {
-    if (typeof window.requestAnimationFrame === "function") return window.requestAnimationFrame(callback);
-    return window.setTimeout(callback, 0);
-  }, []);
-  const cancelFrame = useCallback((frame: number) => {
-    if (typeof window.cancelAnimationFrame === "function") window.cancelAnimationFrame(frame);
-    else window.clearTimeout(frame);
   }, []);
 
   const prefersReducedMotion = useCallback(() => {
@@ -101,34 +97,57 @@ export default function CvShell() {
     if (!viewport) return;
     const anchor = target === "guide" ? guidedRef.current : promptRef.current;
     if (!anchor) return;
-    const viewportRect = viewport.getBoundingClientRect();
-    const anchorRect = anchor.getBoundingClientRect();
-    // Prefer an actual scroll within the terminal instead of moving the page.
-    const desired = target === "prompt"
-      ? Math.max(0, viewport.scrollHeight - viewport.clientHeight)
-      : Math.max(0, viewport.scrollTop + anchorRect.top - viewportRect.top - 22);
-    const behavior: ScrollBehavior = prefersReducedMotion() ? "auto" : "smooth";
-    if (typeof viewport.scrollTo === "function") viewport.scrollTo({ top: desired, behavior });
-    else viewport.scrollTop = desired;
+    if (scrollAnimationFrame.current !== null) {
+      window.cancelAnimationFrame(scrollAnimationFrame.current);
+      scrollAnimationFrame.current = null;
+    }
+    // Keep recomputing the destination as the opening panel collapses; a
+    // fixed end position would jump when the content height changes.
+    const destination = () => {
+      if (target === "prompt") return Math.max(0, viewport.scrollHeight - viewport.clientHeight);
+      const viewportRect = viewport.getBoundingClientRect();
+      const anchorRect = anchor.getBoundingClientRect();
+      return Math.max(0, viewport.scrollTop + anchorRect.top - viewportRect.top - 22);
+    };
+    if (prefersReducedMotion()) {
+      viewport.scrollTo({ top: destination(), behavior: "auto" });
+      return;
+    }
+    const origin = viewport.scrollTop;
+    let elapsed = 0;
+    let previousTime: number | null = null;
+    const animate = (time: number) => {
+      const delta = previousTime === null ? 16 : Math.min(50, Math.max(16, time - previousTime));
+      previousTime = time;
+      elapsed += delta;
+      const progress = Math.min(1, elapsed / PROMPT_SCROLL_MS);
+      const eased = progress * progress * (3 - 2 * progress);
+      viewport.scrollTo({ top: origin + (destination() - origin) * eased, behavior: "auto" });
+      if (progress < 1) scrollAnimationFrame.current = window.requestAnimationFrame(animate);
+      else scrollAnimationFrame.current = null;
+    };
+    scrollAnimationFrame.current = window.requestAnimationFrame(animate);
   }, [prefersReducedMotion]);
 
-  // A native smooth scroll on mode selection. Importantly, do not set
-  // scrollTop = scrollHeight synchronously (the old abrupt jump).
+  // Let the chosen mode appear before moving the scroll position. The scroll
+  // itself uses a fixed, deliberately gentle duration rather than the
+  // browser's usually faster built-in "smooth" timing.
   useEffect(() => {
     if (!mode) return;
-    const frame = nextFrame(() => {
+    const timeout = window.setTimeout(() => {
       if (mode === "expert") promptRef.current?.focus({ preventScroll: true });
       scrollTo(mode === "expert" ? "prompt" : "guide");
-    });
-    return () => cancelFrame(frame);
-  }, [mode, scrollTo, nextFrame, cancelFrame]);
+    }, prefersReducedMotion() ? 0 : 220);
+    return () => window.clearTimeout(timeout);
+  }, [mode, scrollTo, prefersReducedMotion]);
 
-  // New output and the end of the splash transition gently follow the prompt.
+  // Follow newly entered commands without restarting the animation every
+  // frame while the splash closes.
   useEffect(() => {
     if (!mode || !sessionActive) return;
-    const frame = nextFrame(() => scrollTo("prompt"));
-    return () => cancelFrame(frame);
-  }, [mode, lines, sessionActive, startupClosing, showCommandPalette, scrollTo, nextFrame, cancelFrame]);
+    const timeout = window.setTimeout(() => scrollTo("prompt"), prefersReducedMotion() ? 0 : 260);
+    return () => window.clearTimeout(timeout);
+  }, [mode, lines, sessionActive, showCommandPalette, scrollTo, prefersReducedMotion]);
 
   const beginSession = useCallback(() => {
     if (sessionActive) return;

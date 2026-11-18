@@ -16,6 +16,11 @@ describe("CV-only terminal commands", () => {
     expect(help.lines.join(" ")).toContain("cv download");
     expect(help.lines.join(" ")).not.toContain("--docx");
   });
+  it("lists the completed-year DevSecOps training without a future session date", () => {
+    const certs = executeCommand("cv certs").lines.join(" ");
+    expect(certs).toContain("DevSecOps Training (2026)");
+    expect(certs).not.toContain("final session Nov 20");
+  });
   it("accepts cv skill and cv skills as aliases", () => {
     expect(executeCommand("cv skill")).toEqual(executeCommand("cv skills"));
     expect(executeCommand("cv skill -v")).toEqual(executeCommand("cv skills -v"));

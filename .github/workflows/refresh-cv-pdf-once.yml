@@ -1,0 +1,53 @@
+name: Refresh CV PDF once
+on:
+  push:
+    branches: [fix/slower-terminal-devsecops-label]
+    paths:
+      - content/profile.json
+      - .github/workflows/refresh-cv-pdf-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install PDF renderer
+        run: |
+          python -m pip install --disable-pip-version-check playwright==1.57.0 pymupdf==1.26.7
+          python -m playwright install --with-deps chromium
+      - name: Regenerate official Novoresume-style HTML and PDF
+        run: |
+          python scripts/render_resume.py --root . --html public/cv.html --pdf public/resume.pdf --previews /tmp/personal-cv-previews
+          python - <<'PY'
+          import fitz
+          from pathlib import Path
+          pdf = fitz.open("public/resume.pdf")
+          assert len(pdf) == 2, f"Wrong PDF page count: {len(pdf)}"
+          all_text = "\\n".join(page.get_text() for page in pdf)
+          assert "DevSecOps Training (2026)" in all_text
+          assert "final session Nov 20" not in all_text
+          html = Path("public/cv.html").read_text(encoding="utf-8")
+          assert "DevSecOps Training (2026)" in html and "final session Nov 20" not in html
+          print("CV_PDF_LABEL=PASS pages=2 bytes=" + str(Path("public/resume.pdf").stat().st_size))
+          PY
+      - name: Commit generated assets to feature branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/cv.html public/resume.pdf
+          if git diff --cached --quiet; then
+            echo "CV_ASSETS=ALREADY_CURRENT"
+          else
+            git commit -m "build(cv): regenerate Novoresume PDF with simplified DevSecOps label"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
