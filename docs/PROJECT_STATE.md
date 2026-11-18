@@ -57,3 +57,15 @@ Confirm Vercel team authorization, connect the Git repository when approved, dep
 - Vercel Authentication now applies to Preview only; Production public exposure is intentional for a personal portfolio.
 - **Git integration not yet active**: Vercel Git namespace is `Agentic-Trust-Foundation` but its Git provider reports `repo_not_found` for the private repository. Automatic deployment on GitHub pushes will need a Vercel GitHub installation grant to this repository. Direct source upload deployment works without that grant.
 - Follow-up source adjustments for `cv skill` alias and accurate terminal wording must be redeployed to Production before release closure.
+
+## Production release verification — 2026-11-18
+
+- **Current public URL:** https://personal-portfolio-ardindokhts-projects.vercel.app
+- **Verified source commit:** `5ae2c89f25f337282d31513ef0a70dc963f62cd5`
+- **CI:** https://github.com/Agentic-Trust-Foundation/personal-portfolio/actions/runs/44325150028 — SUCCESS (tests, lint, Next.js build, static PDF check).
+- **Production Vercel deployment:** `dpl_3Hwb9vnysHEksaBF5uxKkezP1TaS` — READY; static export with Next.js framework auto-handler disabled and output directory `out`.
+- **HTTP checks:** `/` 200 with onboarding question, `/resume/` 200 with work/projects, `/resume.pdf` 200 with PDF signature and two pages (11,864 bytes). Checks made against the stable production alias through Vercel.
+- **Visitor access:** Vercel Authentication restricted to Preview; Production is intended for public visitors. Preview remains protected.
+- **Command correction:** singular `cv skill` and `cv skill -v` aliases supported alongside plural `cv skills`.
+- **Outstanding:** Vercel GitHub integration lists the organization but cannot see the private repo (`repo_not_found`). Direct source deployment succeeded, but pushes do **not** automatically deploy until the Vercel GitHub App receives repository access.
+- **Outstanding:** Visual browser QA (desktop and phone) has not been demonstrated; component tests and HTTP tests are separate evidence. Confirm contact details and actual Algoritm end month before treating biography as fully verified.
