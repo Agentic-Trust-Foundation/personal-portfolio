@@ -11,6 +11,7 @@ import {
 } from "react";
 import { profile } from "@/content/profile";
 import CvSnake from "./cv-snake";
+import { setOnekoEnabled } from "./oneko-companion";
 import {
   ALLOWED_COMMANDS,
   GUIDED_COMMANDS,
@@ -176,6 +177,9 @@ export default function CvShell() {
     const result = executeCommand(command);
     beginSession();
     if (result.type === "game") setSnakeActive(true);
+    if (result.type === "companion" && result.companion) {
+      setOnekoEnabled(result.companion === "start");
+    }
     setShowCommandPalette(false);
     setShowMore(false);
     setHistory((previous) => [...previous.slice(-79), command]);
@@ -207,6 +211,12 @@ export default function CvShell() {
     }]);
     window.requestAnimationFrame(() => promptRef.current?.focus({ preventScroll: true }));
   }, []);
+
+  useEffect(() => {
+    // Keep the cat quiet during the immersive Snake mini-game, then resume it.
+    document.documentElement.classList.toggle("cv-snake-mode", snakeActive);
+    return () => document.documentElement.classList.remove("cv-snake-mode");
+  }, [snakeActive]);
 
   function chooseMode(nextMode: ShellMode) {
     if (closeTimer.current) clearTimeout(closeTimer.current);
