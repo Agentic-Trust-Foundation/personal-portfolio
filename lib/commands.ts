@@ -48,6 +48,12 @@ export const GUIDED_EXTRA_COMMANDS = [
   { label: "Clear terminal", command: "cv clear" },
 ] as const;
 
+// Keep help descriptions aligned even when commands or labels change.
+const HELP_COLUMN_WIDTH = 32;
+function helpRow(command: string, explanation: string): string {
+  return command.padEnd(HELP_COLUMN_WIDTH, " ") + explanation;
+}
+
 function output(title: string, lines: string[], suggestions?: string[]): CommandResult {
   return { type: "output", title, lines, suggestions };
 }
@@ -86,26 +92,26 @@ export function executeCommand(input: string): CommandResult {
 
   if ((verb === "help" || verb === "--help") && noArgs) {
     return output("Available CV commands", [
-      "cv about                   About me",
-      "cv skill[s]    [-v]        Skills / full skill list",
-      "cv work         [-v]        Work experience / detailed responsibilities",
-      "cv work --company <name>    One employer (algoritm, mobtakeran, etc.)",
-      "cv projects                 Personal projects",
-      "cv projects <name> [-v]     One project (agentwallet, atlas, kuhban)",
-      "cv education                Education",
-      "cv certs                    Training and courses",
-      "cv languages                Spoken languages",
-      "cv contact                  Contact information",
-      "cv resume                   View the full CV page",
-      "cv download                 Download CV as PDF",
-      "cv clear                    Clear terminal history",
+      helpRow("cv about", "About me"),
+      helpRow("cv skill[s] [-v]", "Skills / full skill list"),
+      helpRow("cv work [-v]", "Work experience / detailed responsibilities"),
+      helpRow("cv work --company <name>", "One employer (algoritm, mobtakeran, etc.)"),
+      helpRow("cv projects", "Personal projects"),
+      helpRow("cv projects <name> [-v]", "One project (agentwallet, atlas, kuhban)"),
+      helpRow("cv education", "Education"),
+      helpRow("cv certs", "Training and courses"),
+      helpRow("cv languages", "Spoken languages"),
+      helpRow("cv contact", "Contact information"),
+      helpRow("cv resume", "View the full CV page"),
+      helpRow("cv download", "Download CV as PDF"),
+      helpRow("cv clear", "Clear terminal history"),
       "",
       "Only cv commands work here. Tab completes a command; ↑ / ↓ browse history.",
       "",
       "BONUS / TAKE A BREAK",
-      "cv play snake                Play Snake in full-screen game mode (Esc to return).",
-      "cv play oneko                A little cat chases your mouse around this website.",
-      "cv play oneko off            Dismiss the cat and restore your cursor.",
+      helpRow("cv play snake", "Play Snake in full-screen game mode (Esc to return)."),
+      helpRow("cv play oneko", "A little cat chases your mouse around this website."),
+      helpRow("cv play oneko off", "Dismiss the cat and restore your cursor."),
     ], ["cv about", "cv skills", "cv work", "cv projects"]);
   }
   if (verb === "about" && noArgs) {
