@@ -7,7 +7,7 @@ describe("CV-only terminal commands", () => {
     const languages = executeCommand("cv languages");
     expect(languages.lines.join(" ")).toContain("German — Basic");
     expect(languages.lines.join(" ")).not.toContain("French");
-    expect(executeCommand("cv certs").lines.join(" ")).toContain("DevSecOps Training (2026; final session Nov 20)");
+    expect(executeCommand("cv certs").lines.join(" ")).toContain("DevSecOps Training (2026)");
   });
   it("shows an actionable help reference", () => {
     const help = executeCommand("cv help");
