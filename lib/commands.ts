@@ -6,7 +6,8 @@ import { profile, type Experience, type Project } from "@/content/profile";
  * networking, filesystem access, or free-form code execution is involved.
  */
 export interface CommandResult {
-  type: "output" | "download" | "clear" | "error" | "game";
+  type: "output" | "download" | "clear" | "error" | "game" | "companion";
+  companion?: "start" | "stop";
   title?: string;
   lines: string[];
   suggestions?: string[];
@@ -20,6 +21,7 @@ export const ALLOWED_COMMANDS = [
   "cv projects atlas", "cv projects atlas -v",
   "cv projects kuhban", "cv projects kuhban -v", "cv education", "cv certs", "cv languages",
   "cv contact", "cv resume", "cv download", "cv clear", "cv play snake",
+  "cv play oneko", "cv play oneko off",
 ] as const;
 
 export const GUIDED_COMMANDS = [
@@ -102,6 +104,8 @@ export function executeCommand(input: string): CommandResult {
       "",
       "BONUS / TAKE A BREAK",
       "cv play snake                Play Snake in full-screen game mode (Esc to return).",
+      "cv play oneko                A little cat chases your mouse around this website.",
+      "cv play oneko off            Dismiss the cat and restore your cursor.",
     ], ["cv about", "cv skills", "cv work", "cv projects"]);
   }
   if (verb === "about" && noArgs) {
@@ -164,6 +168,17 @@ export function executeCommand(input: string): CommandResult {
   };
   if (verb === "play" && rest.length === 1 && rest[0] === "snake") {
     return { type: "game", title: "CV Snake", lines: ["Snake running. Press Esc to return to your CV."] };
+  }
+  if (verb === "play" && rest[0] === "oneko" && (rest.length === 1 || (rest.length === 2 && rest[1] === "off"))) {
+    const stopping = rest[1] === "off";
+    return {
+      type: "companion", companion: stopping ? "stop" : "start",
+      title: stopping ? "Oneko stopped" : "Oneko is here!",
+      lines: [stopping
+        ? "The cat is resting. Your regular cursor is back."
+        : "Move your mouse to play with the cat. It follows you across the CV website.",
+        ...(stopping ? [] : ["Type cv play oneko off to say goodbye. Mouse/trackpad only; reduced motion is respected."])],
+    };
   }
   if (verb === "clear" && noArgs) return { type: "clear", lines: [] };
   return error("Unsupported cv command or arguments.");
