@@ -100,7 +100,8 @@ export function executeCommand(input: string): CommandResult {
       "",
       "Only cv commands work here. Tab completes a command; ↑ / ↓ browse history.",
       "",
-      "Tip: Not everything in this terminal is about work.",
+      "BONUS / TAKE A BREAK",
+      "cv play snake                Play Snake in full-screen game mode (Esc to return).",
     ], ["cv about", "cv skills", "cv work", "cv projects"]);
   }
   if (verb === "about" && noArgs) {

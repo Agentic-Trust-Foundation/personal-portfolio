@@ -323,7 +323,7 @@ export default function CvShell() {
   );
 
   return (
-    <main className={`cvcli-viewport${sessionActive ? " cvcli-engaged" : ""}`}
+    <main className={`cvcli-viewport${sessionActive ? " cvcli-engaged" : ""}${snakeActive ? " cvcli-game-mode" : ""}`}
       data-theme={theme} data-phase={sessionActive ? (startupClosing ? "clearing" : "active") : "intro"}
       id="main">
       <a className="cvcli-skip" href="#cvcli-main">Skip to CV terminal</a>
@@ -332,7 +332,7 @@ export default function CvShell() {
           <div className="cvcli-top-left">
             <div className="cvcli-window-dots" aria-hidden="true"><i /><i /><i /></div>
             <span className="cvcli-header-divider" aria-hidden="true" />
-            <span className="cvcli-tab"><span className="cvcli-tab-symbol">▸</span> hossein@cv: ~</span>
+            <span className="cvcli-tab"><span className="cvcli-tab-symbol">▸</span> {snakeActive ? "hossein@cv: ~/snake" : "hossein@cv: ~"}</span>
           </div>
           <nav className="cvcli-utilities" aria-label="CV shortcuts and color theme">
             <button type="button" className="cvcli-theme-switch" onClick={toggleTheme}
@@ -341,15 +341,19 @@ export default function CvShell() {
               <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
               <span>{theme === "dark" ? "LIGHT" : "DARK"}</span>
             </button>
-            <a href="/resume/" title="Open the formatted resume">CV <span aria-hidden="true">↗</span></a>
-            <a href="/resume.pdf" download="Hossein-Mohammaddokht-CV.pdf"
-              title="Download CV as PDF">PDF <span aria-hidden="true">↓</span></a>
+            {!snakeActive && (
+              <>
+                <a href="/resume/" title="Open the formatted resume">CV <span aria-hidden="true">↗</span></a>
+                <a href="/resume.pdf" download="Hossein-Mohammaddokht-CV.pdf"
+                  title="Download CV as PDF">PDF <span aria-hidden="true">↓</span></a>
+              </>
+            )}
           </nav>
         </header>
 
         <div id="cvcli-main" ref={scrollRef} onClick={focusEmptySpace}
-          className="cvcli-console" role="region" aria-label="Interactive CV command line">
-          {(!sessionActive || startupClosing) && (
+          className={`cvcli-console${snakeActive ? " cvcli-console-game" : ""}`} role="region" aria-label={snakeActive ? "CV Snake game mode" : "Interactive CV command line"}>
+          {!snakeActive && (!sessionActive || startupClosing) && (
             <div className={`cvcli-startup${sessionActive ? " cvcli-startup-leaving" : ""}`}>
               <div className="cvcli-startup-content">
                 <div className="cvcli-boot" aria-label="CV shell introduction">
@@ -396,6 +400,11 @@ export default function CvShell() {
           )}
 
           {mode !== null && (
+            snakeActive ? (
+              <div ref={snakeRef} className="cvcli-game-slot">
+                <CvSnake onExit={exitSnake} />
+              </div>
+            ) : (
             <>
               {mode === "guided" && sessionActive && !startupClosing && (
                 <button type="button" className="cvcli-command-toggle"
@@ -430,12 +439,7 @@ export default function CvShell() {
                   </div>
                 ))}
               </div>
-              {snakeActive ? (
-                <div ref={snakeRef} className="cvcli-game-slot">
-                  <CvSnake onExit={exitSnake} />
-                </div>
-              ) : (
-                <form onSubmit={submit} className="cvcli-form" aria-label="CV command input">
+              <form onSubmit={submit} className="cvcli-form" aria-label="CV command input">
                 <label htmlFor="cvcli-command" className="cvcli-form-label">
                   <span>visitor@hossein</span><span className="cvcli-form-sep">:</span>
                   <span>~</span><span className="cvcli-form-dollar">$</span>
@@ -452,16 +456,22 @@ export default function CvShell() {
                   </button>
                 ) : <span className="cvcli-enter-hint" aria-hidden="true">↵ Enter</span>}
               </form>
-              )}
-              {!snakeActive && hint && <div className="cvcli-hint" role="status">{hint}</div>}
+              {hint && <div className="cvcli-hint" role="status">{hint}</div>}
             </>
           )}
         </div>
 
         <footer className="cvcli-status" aria-label="Terminal status">
           <div className="cvcli-status-left"><span className="cvcli-status-dot" /> {snakeActive ? "SNAKE ACTIVE" : sessionActive ? "ACTIVE SESSION" : mode ? `${mode.toUpperCase()} MODE` : "SESSION NOT STARTED"}</div>
-          {mode && <button className="cvcli-status-switch" type="button" onClick={() => chooseMode(mode === "guided" ? "expert" : "guided")}>Switch mode ↔</button>}
-          <div className="cvcli-status-center">SAFE CV CLI · NO OS SHELL</div>
+          {mode && !snakeActive && <button className="cvcli-status-switch" type="button" onClick={() => chooseMode(mode === "guided" ? "expert" : "guided")}>Switch mode ↔</button>}
+          {mode && !snakeActive ? (
+            <button type="button" className="cvcli-status-help" onClick={() => execute("cv help")}
+              aria-label="Show CV help and extras" title="Discover CV commands and a little bonus">
+              ? HELP + EXTRAS
+            </button>
+          ) : (
+            <div className="cvcli-status-center">{snakeActive ? "GAME MODE · ESC TO RETURN" : "SAFE CV CLI · NO OS SHELL"}</div>
+          )}
           <div className="cvcli-status-right">{snakeActive ? "ARROWS/WASD · P: PAUSE · ESC: EXIT" : mode === "expert" ? "TAB: COMPLETE · ↑↓: HISTORY" : mode === "guided" ? "CLICK OR TYPE" : "CHOOSE 1 OR 2"}</div>
         </footer>
       </div>

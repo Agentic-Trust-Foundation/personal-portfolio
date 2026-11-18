@@ -331,3 +331,79 @@
   .cv-snake-buttons { flex-wrap: wrap; }
 }
 @media (prefers-reduced-motion: reduce) { .cv-snake-cursor { animation: none; } }
+
+/* Immersive game view. A true alternate screen, not a widget below command history. */
+.cvcli-viewport.cvcli-game-mode {
+  padding: 0;
+  overflow: hidden;
+}
+.cvcli-game-mode .cvcli-shell {
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.cvcli-console-game {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  padding: clamp(10px, 2vh, 24px) clamp(10px, 2vw, 34px);
+}
+.cvcli-console-game .cvcli-game-slot {
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  flex: 1;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+.cvcli-game-mode .cv-snake {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0 12px;
+}
+.cvcli-game-mode .cv-snake-heading,
+.cvcli-game-mode .cv-snake-bottom,
+.cvcli-game-mode .cv-snake-touch {
+  width: min(100%, max(220px, calc((100dvh - 280px) * 1.7142857)));
+}
+.cvcli-game-mode .cv-snake-board-wrap {
+  width: min(100%, max(220px, calc((100dvh - 280px) * 1.7142857)));
+  flex: 0 0 auto;
+  padding: clamp(4px, .8vw, 12px);
+}
+.cvcli-game-mode .cv-snake-overlay { inset: clamp(4px, .8vw, 12px); }
+.cvcli-game-mode .cv-snake-heading { margin-bottom: 12px; }
+.cvcli-game-mode .cv-snake-bottom { margin-top: 12px; }
+.cvcli-status-help {
+  font: inherit;
+  font-size: 10px;
+  color: var(--cli-highlight);
+  background: none;
+  border: 1px solid var(--cli-line);
+  border-radius: 3px;
+  padding: 5px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cvcli-status-help:hover { background: var(--cli-hover); }
+@media (max-width: 600px) {
+  .cvcli-game-mode .cvcli-header { padding: 0 12px; }
+  .cvcli-game-mode .cv-snake { justify-content: flex-start; }
+  .cvcli-game-mode .cv-snake-board-wrap { padding: 4px; }
+  .cvcli-game-mode .cv-snake-bottom { gap: 7px; margin-top: 8px; }
+  .cvcli-game-mode .cv-snake-touch { margin-top: 11px; padding-bottom: 6px; }
+  .cvcli-status-help { padding: 4px 6px; font-size: 9px; }
+}
