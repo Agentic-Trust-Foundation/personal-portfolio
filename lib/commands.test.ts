@@ -5,8 +5,8 @@ import { profile } from "../content/profile";
 describe("CV-only terminal commands", () => {
   it("keeps the Snake Easter egg off the normal help and guided commands", () => {
     const help = executeCommand("cv help");
-    expect(help.lines.join(" ")).toContain("Not everything in this terminal is about work.");
-    expect(help.lines.join(" ")).not.toContain("cv play snake");
+    expect(help.lines.join(" ")).toContain("BONUS / TAKE A BREAK");
+    expect(help.lines.join(" ")).toContain("cv play snake");
     expect(GUIDED_COMMANDS.some((item) => item.command === "cv play snake")).toBe(false);
     expect(GUIDED_EXTRA_COMMANDS.some((item) => item.command === "cv play snake")).toBe(false);
     expect(ALLOWED_COMMANDS).toContain("cv play snake");

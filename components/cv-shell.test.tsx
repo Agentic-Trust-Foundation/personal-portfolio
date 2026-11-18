@@ -53,11 +53,27 @@ describe("Terminal-first CV interaction", () => {
     await act(async () => { form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); });
     expect(host.querySelector('[aria-label="CV Snake game"]')).toBeTruthy();
     expect(host.querySelector("#cvcli-command")).toBeNull();
+    expect(host.querySelector(".cvcli-history")).toBeNull();
+    expect(host.querySelector(".cvcli-startup")).toBeNull();
+    expect(host.querySelector(".cvcli-command-toggle")).toBeNull();
+    expect(host.querySelector(".cvcli-viewport")?.classList.contains("cvcli-game-mode")).toBe(true);
+    expect(host.querySelector(".cvcli-console-game")).toBeTruthy();
+    expect(host.querySelector(".cvcli-status-switch")).toBeNull();
     await act(async () => { window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); });
     expect(host.querySelector('[aria-label="CV Snake game"]')).toBeNull();
     expect(host.querySelector("#cvcli-command")).toBeTruthy();
+    expect(host.querySelector(".cvcli-history")).toBeTruthy();
+    expect(host.querySelector(".cvcli-viewport")?.classList.contains("cvcli-game-mode")).toBe(false);
     expect(host.textContent).toContain("Back to CV");
   });
+  it("makes hidden extras discoverable through a small Help control, not the guided menu", async () => {
+    await click("Yes, I have");
+    await click("HELP + EXTRAS");
+    expect(host.textContent).toContain("cv play snake");
+    expect(host.querySelector(".cvcli-game-slot")).toBeNull();
+    expect(host.querySelectorAll(".cvcli-action")).toHaveLength(0);
+  });
+
   it("starts in the dark terminal and asks about Bash", () => {
     expect(host.querySelector(".cvcli-shell")).toBeTruthy();
     expect(host.querySelector(".cvcli-viewport")?.getAttribute("data-theme")).toBe("dark");
