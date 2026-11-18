@@ -75,11 +75,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin "${GITHUB_REF_NAME}"
           git add public/resume.pdf
           if git diff --cached --quiet; then
             echo "CV_ASSETS=ALREADY_CURRENT"
           else
             git commit -m "build(cv): replace DevSecOps PDF label with original font"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
