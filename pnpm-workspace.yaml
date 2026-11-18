@@ -1,0 +1,10 @@
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
+managePackageManagerVersions: false
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - unrs-resolver
+verifyDepsBeforeRun: false
