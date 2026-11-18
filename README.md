@@ -43,6 +43,7 @@ Requires Node.js 22+ and pnpm (lockfile pinned to upstream dependencies).
 ```bash
 corepack enable
 pnpm install --frozen-lockfile
+pnpm dev        # local site with generated PDF
 pnpm test
 pnpm lint
 pnpm build
