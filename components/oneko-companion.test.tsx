@@ -45,6 +45,39 @@ describe("Oneko website companion", () => {
     expect(window.sessionStorage.getItem("hossein-cv-oneko-enabled")).toBeNull();
   });
 
+  it("chases the user's mouse without intercepting mouse input", async () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query.includes("(pointer: fine)"),
+      media: query,
+      addListener: () => {}, removeListener: () => {},
+      addEventListener: () => {}, removeEventListener: () => {},
+    }));
+    await act(async () => { setOnekoEnabled(true); });
+    const sprite = container.querySelector<HTMLElement>(".cv-oneko-cat");
+    expect(sprite).not.toBeNull();
+    const initial = sprite!.style.transform;
+    window.dispatchEvent(new MouseEvent("mousemove", {
+      clientX: 240, clientY: 180, bubbles: true,
+    }));
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 230)); });
+    expect(sprite!.style.transform).not.toBe(initial);
+  });
+
+  it("respects the system's reduced-motion preference", async () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query.includes("pointer: fine") || query.includes("reduced-motion: reduce"),
+      media: query,
+      addListener: () => {}, removeListener: () => {},
+      addEventListener: () => {}, removeEventListener: () => {},
+    }));
+    await act(async () => { setOnekoEnabled(true); });
+    const sprite = container.querySelector<HTMLElement>(".cv-oneko-cat");
+    const initial = sprite!.style.transform;
+    window.dispatchEvent(new MouseEvent("mousemove", { clientX: 240, clientY: 180 }));
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 160)); });
+    expect(sprite!.style.transform).toBe(initial);
+  });
+
   it("keeps its activation across a page remount in the same tab", async () => {
     await act(async () => { setOnekoEnabled(true); });
     await act(async () => { root.unmount(); });

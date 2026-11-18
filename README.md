@@ -32,6 +32,9 @@ cv contact
 cv resume
 cv download
 cv clear
+cv play snake
+cv play oneko
+cv play oneko off
 ```
 
 No OS command works: `bash`, `ls`, `cat`, `sudo`, etc. are rejected in `lib/commands.ts`. Input is rendered as React text; no command is executed in the host environment.
@@ -81,3 +84,9 @@ See [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) for implementation checklist,
 ## License and attribution
 
 Original template (c) 2026 Umer Farooq, MIT. License is preserved in [LICENSE](LICENSE). Adaptations are for Hossein's personal portfolio.
+
+## Fun commands and Oneko attribution
+
+The CV terminal offers two optional Bonus commands: `cv play snake` (in-terminal game mode) and `cv play oneko` (pixel cat follows the mouse across this portfolio). `cv play oneko off` or the tiny Oneko dismissal button disables it. The cat runs only in the browser, remembers activation for the current tab, uses no backend/network access, and respects reduced-motion settings. It cannot follow the cursor on unrelated websites; that would require a browser extension.
+
+Cat spritesheet and sprite-frame references: **adryd325/oneko.js** (copyright © 2022 adryd, MIT). The sprite is stored locally at `public/oneko.gif` and the license notice is preserved at `licenses/oneko-js-MIT.txt`. The cursor mouse SVG is independently authored for this portfolio.
