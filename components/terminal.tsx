@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import { ALLOWED_COMMANDS, GUIDED_COMMANDS, executeCommand, type CommandResult } from "@/lib/commands";
+import { ALLOWED_COMMANDS, GUIDED_COMMANDS, GUIDED_EXTRA_COMMANDS, executeCommand, type CommandResult } from "@/lib/commands";
 
 type Mode = "guided" | "expert";
 type Turn = { id: number; command: string; result: CommandResult };
@@ -13,6 +13,7 @@ export default function Terminal() {
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [hint, setHint] = useState("");
+  const [showMore, setShowMore] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
   const idRef = useRef(0);
@@ -97,6 +98,7 @@ export default function Terminal() {
 
   const setExperience = (selected: Mode) => {
     setMode(selected);
+    setShowMore(false);
     setTurns([]);
     setHistoryIndex(-1);
     setValue("");
@@ -148,6 +150,22 @@ export default function Terminal() {
                   </button>
                 ))}
               </div>
+            )}
+            {mode === "guided" && (
+              <>
+                <button className="more-commands-toggle" type="button" aria-expanded={showMore} onClick={() => setShowMore((previous) => !previous)}>
+                  {showMore ? "− Hide additional commands" : "+ More commands"}
+                </button>
+                {showMore && (
+                  <div className="guided-commands extra-commands" aria-label="Additional CV commands">
+                    {GUIDED_EXTRA_COMMANDS.map((item) => (
+                      <button key={item.command} type="button" title={item.command} onClick={() => run(item.command)}>
+                        <span>{item.label}</span><code>{item.command}</code>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
             <div className="terminal-transcript" role="log" aria-live="polite" aria-relevant="additions text">
               {turns.map((turn) => (

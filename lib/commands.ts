@@ -32,6 +32,19 @@ export const GUIDED_COMMANDS = [
   { label: "Download PDF", command: "cv download" },
 ] as const;
 
+export const GUIDED_EXTRA_COMMANDS = [
+  { label: "Help", command: "cv help" },
+  { label: "All skills", command: "cv skills -v" },
+  { label: "Algoritm details", command: "cv work --company algoritm" },
+  { label: "AgentWallet", command: "cv projects agentwallet -v" },
+  { label: "Atlas", command: "cv projects atlas -v" },
+  { label: "Kuhban", command: "cv projects kuhban -v" },
+  { label: "Certificates", command: "cv certs" },
+  { label: "Languages", command: "cv languages" },
+  { label: "Full CV page", command: "cv resume" },
+  { label: "Clear terminal", command: "cv clear" },
+] as const;
+
 function output(title: string, lines: string[], suggestions?: string[]): CommandResult {
   return { type: "output", title, lines, suggestions };
 }

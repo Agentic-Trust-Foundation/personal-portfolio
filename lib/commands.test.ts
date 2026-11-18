@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ALLOWED_COMMANDS, GUIDED_COMMANDS, executeCommand } from "./commands";
+import { ALLOWED_COMMANDS, GUIDED_COMMANDS, GUIDED_EXTRA_COMMANDS, executeCommand } from "./commands";
 import { profile } from "../content/profile";
 
 describe("CV-only terminal commands", () => {
@@ -58,7 +58,7 @@ describe("CV-only terminal commands", () => {
   });
   it("keeps guided actions within the approved command list", () => {
     const allowed = new Set<string>(ALLOWED_COMMANDS);
-    for (const action of GUIDED_COMMANDS) {
+    for (const action of [...GUIDED_COMMANDS, ...GUIDED_EXTRA_COMMANDS]) {
       expect(allowed.has(action.command)).toBe(true);
       expect(executeCommand(action.command).type).not.toBe("error");
     }

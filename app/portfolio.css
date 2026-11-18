@@ -180,3 +180,7 @@ button:disabled { cursor: not-allowed; }
   .project-status,.project-tags span { color:#444!important; border-color:#777!important; }
   .resume-job { break-inside:avoid; }
 }
+
+.more-commands-toggle { border:0; background:transparent; color:var(--site-accent); font-size:11px; padding:2px 0 14px; margin-top:-14px; text-decoration:underline; text-underline-offset:4px; }
+.more-commands-toggle:hover { color:#d0f0dc; }
+.extra-commands { margin-top:3px; border-top:1px dashed #31483d; padding-top:13px; }
