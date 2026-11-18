@@ -3,6 +3,26 @@ import { ALLOWED_COMMANDS, GUIDED_COMMANDS, GUIDED_EXTRA_COMMANDS, executeComman
 import { profile } from "../content/profile";
 
 describe("CV-only terminal commands", () => {
+  it("keeps every cv help description aligned to column 32, including Bonus", () => {
+    const rows = executeCommand("cv help").lines;
+    const descriptions = [
+      "About me", "Skills / full skill list", "Work experience / detailed responsibilities",
+      "One employer (algoritm, mobtakeran, etc.)", "Personal projects",
+      "One project (agentwallet, atlas, kuhban)", "Education", "Training and courses",
+      "Spoken languages", "Contact information", "View the full CV page",
+      "Download CV as PDF", "Clear terminal history",
+      "Play Snake in full-screen game mode (Esc to return).",
+      "A little cat chases your mouse around this website.",
+      "Dismiss the cat and restore your cursor.",
+    ];
+    for (const description of descriptions) {
+      const row = rows.find((line) => line.includes(description));
+      expect(row).toBeDefined();
+      expect(row!.indexOf(description)).toBe(32);
+    }
+  });
+
+
   it("keeps the Snake Easter egg off the normal help and guided commands", () => {
     const help = executeCommand("cv help");
     expect(help.lines.join(" ")).toContain("BONUS / TAKE A BREAK");
