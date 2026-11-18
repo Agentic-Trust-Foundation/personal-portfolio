@@ -7,7 +7,7 @@ describe("CV-only terminal commands", () => {
     const languages = executeCommand("cv languages");
     expect(languages.lines.join(" ")).toContain("German — Basic");
     expect(languages.lines.join(" ")).not.toContain("French");
-    expect(executeCommand("cv certs").lines.join(" ")).toContain("DevSecOps Training (2026; final session Nov 20)");
+    expect(executeCommand("cv certs").lines.join(" ")).toContain("DevSecOps Training (2026)");
   });
   it("shows an actionable help reference", () => {
     const help = executeCommand("cv help");
@@ -15,6 +15,11 @@ describe("CV-only terminal commands", () => {
     expect(help.lines.join(" ")).toContain("cv work");
     expect(help.lines.join(" ")).toContain("cv download");
     expect(help.lines.join(" ")).not.toContain("--docx");
+  });
+  it("lists the completed-year DevSecOps training without a future session date", () => {
+    const certs = executeCommand("cv certs").lines.join(" ");
+    expect(certs).toContain("DevSecOps Training (2026)");
+    expect(certs).not.toContain("final session Nov 20");
   });
   it("accepts cv skill and cv skills as aliases", () => {
     expect(executeCommand("cv skill")).toEqual(executeCommand("cv skills"));

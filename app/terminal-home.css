@@ -223,9 +223,9 @@
   opacity: 1;
   transform: translateY(0);
   transition:
-    grid-template-rows 580ms cubic-bezier(.22,1,.36,1),
-    opacity 420ms ease-out,
-    transform 580ms cubic-bezier(.22,1,.36,1);
+    grid-template-rows 1080ms cubic-bezier(.4,0,.2,1),
+    opacity 840ms ease-out,
+    transform 1080ms cubic-bezier(.4,0,.2,1);
 }
 .cvcli-startup-content { min-height: 0; overflow: hidden; }
 .cvcli-startup-leaving {
@@ -281,9 +281,9 @@
 .cvcli-viewport[data-phase="intro"] .cvcli-session,
 .cvcli-viewport[data-phase="intro"] .cvcli-guided,
 .cvcli-viewport[data-phase="intro"] .cvcli-form {
-  animation: cvcli-mode-arrive 560ms cubic-bezier(.22,1,.36,1) both;
+  animation: cvcli-mode-arrive 790ms cubic-bezier(.4,0,.2,1) both;
 }
-.cvcli-viewport[data-phase="intro"] .cvcli-form { animation-delay: 90ms; }
+.cvcli-viewport[data-phase="intro"] .cvcli-form { animation-delay: 150ms; }
 @media (prefers-reduced-motion: reduce) {
   .cvcli-viewport[data-phase="intro"] .cvcli-session,
   .cvcli-viewport[data-phase="intro"] .cvcli-guided,

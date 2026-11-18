@@ -36,7 +36,7 @@ async function click(label: string) {
   await act(async () => { button(label).click(); });
 }
 async function settleTransition() {
-  await act(async () => { await new Promise((resolve) => setTimeout(resolve, 630)); });
+  await act(async () => { await new Promise((resolve) => setTimeout(resolve, 1220)); });
 }
 
 describe("Terminal-first CV interaction", () => {
@@ -55,13 +55,13 @@ describe("Terminal-first CV interaction", () => {
     expect(host.querySelector(".cvcli-viewport")?.getAttribute("data-theme")).toBe("dark");
   });
 
-  it("smoothly scrolls to the prompt after expert mode selection", async () => {
+  it("eases the prompt into view on a paced scroll after expert mode selection", async () => {
     await click("Yes, I have");
-    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 20)); });
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 290)); });
     expect(host.textContent).toContain("EXPERT MODE");
     expect(host.textContent).toContain("Terminal mode ready.");
     expect(scrollSpy).toHaveBeenCalled();
-    expect(scrollSpy.mock.calls.some(([options]) => options.behavior === "smooth")).toBe(true);
+    expect(scrollSpy.mock.calls.some(([options]) => options.behavior === "auto")).toBe(true);
     expect(host.querySelector("#cvcli-command")).toBeTruthy();
   });
 
