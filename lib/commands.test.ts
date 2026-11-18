@@ -10,7 +10,11 @@ describe("CV-only terminal commands", () => {
     expect(help.lines.join(" ")).toContain("cv download");
     expect(help.lines.join(" ")).not.toContain("--docx");
   });
-  it("accepts cv skill and cv skills as aliases", () => {\n    expect(executeCommand("cv skill")).toEqual(executeCommand("cv skills"));\n    expect(executeCommand("cv skill -v")).toEqual(executeCommand("cv skills -v"));\n  });\n  it("accepts and normalizes whitespace and case", () => {
+  it("accepts cv skill and cv skills as aliases", () => {
+    expect(executeCommand("cv skill")).toEqual(executeCommand("cv skills"));
+    expect(executeCommand("cv skill -v")).toEqual(executeCommand("cv skills -v"));
+  });
+  it("accepts and normalizes whitespace and case", () => {
     const a = executeCommand(" CV   WoRk   -V ");
     expect(a.type).toBe("output");
     expect(a.lines.join(" ")).toContain("Apache Fineract");
