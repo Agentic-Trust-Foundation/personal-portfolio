@@ -458,6 +458,7 @@ export default function CvShell() {
               </form>
               {hint && <div className="cvcli-hint" role="status">{hint}</div>}
             </>
+            )
           )}
         </div>
 
