@@ -1,0 +1,59 @@
+name: Portfolio checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portfolio-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.1.1
+
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Static build with PDF
+        run: pnpm build
+
+      - name: Verify static files
+        run: |
+          node --input-type=module -e '
+            import { readFileSync, existsSync } from "node:fs";
+            import assert from "node:assert/strict";
+            const pdf = readFileSync("out/resume.pdf");
+            assert(pdf.subarray(0, 8).toString().startsWith("%PDF-1."));
+            assert(pdf.length > 1000);
+            assert(existsSync("out/index.html"));
+            assert(existsSync("out/resume/index.html"));
+            console.log("PORTFOLIO_STATIC_EXPORT=PASS PDF_BYTES=" + pdf.length);
+          '
