@@ -21,7 +21,7 @@ export default function CvSnake({ onExit }: { onExit: (score: number) => void })
   const bestWritten = useRef(0);
   const gameRef = useRef<HTMLElement>(null);
   const scoreRef = useRef(0);
-  scoreRef.current = game.score;
+  useEffect(() => { scoreRef.current = game.score; }, [game.score]);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
