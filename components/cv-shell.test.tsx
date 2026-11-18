@@ -57,7 +57,7 @@ describe("Terminal-first portfolio UX", () => {
 
   it("gives an expert a real prompt with minimal help", async () => {
     await click("Yes, I have");
-    expect(host.textContent).toContain("TERMINAL MODE");
+    expect(host.textContent).toContain("EXPERT MODE");
     expect(host.textContent).toContain("cv help");
     expect(host.querySelector("#cvcli-command")).toBeTruthy();
     expect(host.querySelectorAll(".cvcli-action")).toHaveLength(0);
