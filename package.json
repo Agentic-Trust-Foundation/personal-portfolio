@@ -5,18 +5,18 @@
   "license": "MIT",
   "packageManager": "pnpm@11.1.1",
   "engines": {
-    "node": ">=22.0.0"
+    "node": "22.x"
   },
   "scripts": {
-    "dev": "node scripts/generate-resume-pdf.mjs && next dev",
-    "build": "node scripts/generate-resume-pdf.mjs && next build",
+    "dev": "next dev",
+    "build": "next build",
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky || true",
-    "pdf": "node scripts/generate-resume-pdf.mjs"
+    "pdf": "python scripts/render_resume.py"
   },
   "dependencies": {
     "clsx": "^2.1.1",

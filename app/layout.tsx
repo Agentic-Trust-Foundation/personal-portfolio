@@ -6,15 +6,15 @@ import "./portfolio.css";
 export const viewport: Viewport = { themeColor: "#0b1016", width: "device-width", initialScale: 1 };
 
 export const metadata: Metadata = {
-  title: `${profile.name} — DevOps & Platform Engineer`,
-  description: "DevOps, API Management, platform engineering and current AI Systems projects. Explore work experience and skills through an interactive CV terminal.",
+  title: `${profile.name} — ${profile.role}`,
+  description: "DevOps, API Management & AI Platform Engineering. Explore experience, skills and projects through an interactive CV terminal.",
   applicationName: "Hossein — Interactive CV",
   authors: [{ name: profile.name }],
   robots: { index: true, follow: true },
   icons: { icon: "/favicon.svg" },
   openGraph: {
     type: "profile",
-    title: `${profile.name} | DevOps & Platform Engineer`,
+    title: `${profile.name} | ${profile.role}`,
     description: "API platforms, infrastructure, DevOps, and AI Systems Engineering.",
   },
 };

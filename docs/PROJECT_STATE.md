@@ -69,3 +69,13 @@ Confirm Vercel team authorization, connect the Git repository when approved, dep
 - **Command correction:** singular `cv skill` and `cv skill -v` aliases supported alongside plural `cv skills`.
 - **Outstanding:** Vercel GitHub integration lists the organization but cannot see the private repo (`repo_not_found`). Direct source deployment succeeded, but pushes do **not** automatically deploy until the Vercel GitHub App receives repository access.
 - **Outstanding:** Visual browser QA (desktop and phone) has not been demonstrated; component tests and HTTP tests are separate evidence. Confirm contact details and actual Algoritm end month before treating biography as fully verified.
+
+## German CV update — 2026-11-18
+
+- Prepared Novorésumé-like 2-page HTML/CSS and PDF from owner-provided HTML, with locally bundled SVG geometry (no editor scripts, trackers, or font binaries).
+- German (Basic) replaces French in canonical data, web CV, static `cv.html`, PDF, and `cv languages` output. Persian/English unchanged.
+- Headline remains `DevOps | API Management & AI Platform Engineer`; focus is `AI Systems & Agentic AI Platform Engineering`.
+- DevSecOps listed as training in progress (`2026; final session Nov 20`), not an awarded certification.
+- Home hero now emphasizes API Management / Platform Engineering / Agentic AI, not Infrastructure as a headline.
+- Vercel Git integration is now linked to `Agentic-Trust-Foundation/personal-portfolio`, confirmed in Vercel deployment context. PR preview and CI must pass before merging to main.
+- Future updates to `content/profile.json` require regenerating the tracked `public/cv.html` and `public/resume.pdf` by running `python scripts/render_resume.py --root . --html public/cv.html --pdf public/resume.pdf --previews .cv-render`. Vercel requires no Python backend.

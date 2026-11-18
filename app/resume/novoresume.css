@@ -1,0 +1,158 @@
+/* Reconstructed from the user's Novorésumé A4 export. This is a clean resume
+   presentation, not an embedded third-party editor. All selectors are scoped. */
+.ncv-shell {
+  --ncv-navy:#193042;
+  --ncv-teal:#2e8194;
+  --ncv-blue:#96bbd7;
+  --ncv-ink:#111820;
+  --ncv-muted:#677482;
+  min-height:100vh;
+  background:#242b34;
+  color:var(--ncv-ink);
+  font: 12px/1.47 'Open Sans',Arial,sans-serif;
+  padding:0 0 27px;
+  -webkit-font-smoothing: antialiased;
+}
+.ncv-shell * { box-sizing:border-box; }
+.ncv-shell a { color:inherit; }
+.ncv-toolbar {
+  width:min(calc(210mm + 10px),calc(100% - 28px));
+  margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;
+  padding:18px 4px 14px;
+  font:12px/1.4 'Open Sans',Arial,sans-serif;
+}
+.ncv-toolbar a {
+  color:#e9f1f3;text-decoration:none;border:1px solid #687d8c;
+  border-radius:5px;padding:9px 12px;display:inline-flex;gap:8px;align-items:center;
+  background:#304050;
+}
+.ncv-toolbar a:hover { background:#425563; }
+.ncv-toolbar a.ncv-download { border-color:#2e8194;background:#2e8194;color:white;font-weight:700; }
+.ncv-toolbar a.ncv-download:hover { background:#246c7d; }
+.ncv-toolbar .ncv-tools { display:flex;gap:9px; }
+.ncv-stack { display:flex;flex-direction:column;gap:19px;align-items:center; }
+.ncv-page-frame {
+  background:#485a6d;border-radius:13px;padding:5px;
+  box-shadow:0 13px 36px rgba(0,0,0,.19);
+  width:calc(210mm + 10px);max-width:calc(100% - 24px);
+}
+.ncv-paper {
+  position:relative;overflow:hidden;
+  width:210mm; min-height:297mm; max-height:297mm;
+  background:white;color:#13171b;
+  border-radius:8px;
+  padding:10.4mm 9.9mm 8.8mm;
+  display:flex;flex-direction:column;
+  isolation:isolate;
+}
+/* Both geometric backdrops are taken from the SVGs in the user's HTML export. */
+.ncv-paper::before,.ncv-paper::after {
+  content:""; position:absolute;z-index:-1;left:0;width:100%;
+  pointer-events:none;background-size:100% auto;background-repeat:no-repeat;
+}
+.ncv-paper::before { top:0;height:570px;background-image:url('/resume-circuit-top.svg'); }
+.ncv-paper::after { bottom:0;height:570px;background-position:bottom;background-image:url('/resume-circuit-bottom.svg'); }
+.ncv-header {display:grid;grid-template-columns:minmax(0,1fr) 31.5%;gap:23px;align-items:start;border-bottom:2.1px solid #193042;padding-bottom:21px;margin-bottom:22px;position:relative;}
+.ncv-header::before { content:""; position:absolute;left:-10.4mm;top:0;width:17px;height:35px;background:var(--ncv-navy);border-radius:0 4px 4px 0; }
+.ncv-heading {padding-right:3px;min-width:0;}
+.ncv-name { color:var(--ncv-navy);font-size:25px;line-height:1.17;letter-spacing:.1px;font-weight:700;margin:0 0 4px; }
+.ncv-role {font-size:14.1px;line-height:1.35;font-weight:400;margin:0 0 10px;color:#151515;}
+.ncv-summary {font-size:11.9px;line-height:1.57;margin:0 0 8px;max-width:485px;color:#151515;}
+.ncv-summary:last-child {margin-bottom:0;}
+.ncv-contact {border-left:1px solid #bbc8d2;padding:2px 0 0 17px;margin-top:27px;min-width:0;}
+.ncv-contact-line {display:flex;align-items:center;gap:9px;margin:0 0 17px;font-size:11.2px;line-height:1.5;min-width:0;overflow-wrap:anywhere;text-decoration:none;}
+.ncv-contact-line:last-child {margin-bottom:0;}
+.ncv-contact-line:hover {color:#2e8194;}
+.ncv-contact-icon {width:17px;height:17px;min-width:17px;stroke:#2e8194;stroke-width:1.5;fill:none;vertical-align:middle;}
+.ncv-section {margin:0 0 20px;position:relative;}
+.ncv-section-title {color:var(--ncv-navy);font-size:15.3px;line-height:1.2;margin:0 0 15px;text-transform:uppercase;font-weight:700;letter-spacing:.1px;}
+.ncv-skill-tags {display:flex;flex-wrap:wrap;gap:8px 7px;margin:0 0 3px;align-content:start;}
+.ncv-skill-chip {display:inline-block;max-width:100%;padding:5px 7px 6px;border-radius:3px;background:#96bbd7;color:#11181e;font-size:11.3px;line-height:1.3;}
+.ncv-skill-chip strong {font-weight:400;}
+.ncv-job {position:relative;margin:0 0 16px;break-inside:avoid;}
+.ncv-job::before {content:"";position:absolute;top:1px;left:-10.4mm;width:18px;height:30px;background:#2e8194;border-radius:0 3px 3px 0;}
+.ncv-job h3 {font-size:13.1px;font-weight:700;line-height:1.34;margin:0;color:#121212;}
+.ncv-job-company {font-size:12.3px;line-height:1.43;margin:2px 0 0;font-weight:400;color:#13171b;}
+.ncv-job-date {font-size:10.4px;color:#252b30;margin:0 0 5px;}
+.ncv-job-label {font-size:11.3px;font-weight:700;margin:4px 0 1px;color:#2e8194;}
+.ncv-list {padding:0 0 0 10px;margin:2px 0 0;list-style:none;}
+.ncv-list li {position:relative;font-size:11.15px;line-height:1.53;margin:0 0 2px;padding:0;}
+.ncv-list li::before {position:absolute;left:-10px;top:0;content:'•';color:#2e8194;font-weight:700;}
+.ncv-two-col {display:grid;grid-template-columns:1fr 1fr;column-gap:27px;row-gap:8px;}
+.ncv-cert-item {font-size:11.8px;font-weight:700;line-height:1.55;position:relative;padding-left:11px;min-width:0;}
+.ncv-cert-item::before {position:absolute;left:0;top:0;content:'•';color:#151515;}
+.ncv-cert-item small {display:block;font-size:10.5px;font-weight:400;color:#56616b;}
+.ncv-education-item {font-size:11.3px;line-height:1.43;min-width:0;margin-bottom:4px;}
+.ncv-education-item strong {display:block;color:#141414;font-size:12px;line-height:1.45;}
+.ncv-education-item .ncv-education-meta {font-size:10.7px;color:#323b42;}
+.ncv-language-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}
+.ncv-language-item {font-size:11.8px;line-height:1.45;}
+.ncv-language-item strong {display:block;font-weight:700;}
+.ncv-language-item em {font-size:10.7px;line-height:1.45;color:#2e8194;}
+.ncv-projects {display:grid;grid-template-columns:1fr;gap:10px;}
+.ncv-project {position:relative;break-inside:avoid;}
+.ncv-project h3 {font-size:12.4px;margin:0;font-weight:700;color:#111;}
+.ncv-project-sub {font-size:10.9px;color:#2e8194;font-weight:700;margin:0 0 1px;}
+.ncv-project p {margin:0;font-size:10.7px;line-height:1.42;}
+.ncv-project-state {font-size:10px;color:#61717d;}
+.ncv-footer {margin-top:auto;min-height:18px;display:flex;align-items:end;justify-content:space-between;color:#858a8f;font-size:9.6px;line-height:1.25;}
+.ncv-footer span:last-child {font-size:10.1px;}
+.ncv-page2 .ncv-section {margin-bottom:15px;}
+.ncv-page2 .ncv-job {margin-bottom:12px;}
+.ncv-page2 .ncv-list li {font-size:10.9px;line-height:1.42;margin-bottom:0;}
+.ncv-page2 .ncv-section-title {margin-bottom:12px;}
+.ncv-page2 .ncv-project p {font-size:10.5px;line-height:1.4;}
+.ncv-page2 .ncv-projects {gap:8px;}
+.ncv-page2 .ncv-project-sub {font-size:10.2px;}
+.ncv-page2 .ncv-footer {font-size:9px;}
+@page {size:A4;margin:0;}
+@media print {
+ html,body {margin:0!important;padding:0!important;background:white!important;}
+ .ncv-shell {background:white!important;padding:0!important;margin:0!important;}
+ .ncv-toolbar {display:none!important;}
+ .ncv-stack {display:block!important;gap:0!important;}
+ .ncv-page-frame {background:white!important;box-shadow:none!important;border:0!important;border-radius:0!important;padding:0!important;margin:0!important;width:210mm!important;max-width:210mm!important;break-after:page;page-break-after:always;}
+ .ncv-page-frame:last-child {break-after:auto;page-break-after:auto;}
+ .ncv-paper {width:210mm!important;min-height:297mm!important;max-height:297mm!important;border-radius:0!important;}
+ .ncv-paper::before,.ncv-paper::after {print-color-adjust:exact;-webkit-print-color-adjust:exact;}
+ .ncv-skill-chip,.ncv-job::before,.ncv-header::before {print-color-adjust:exact;-webkit-print-color-adjust:exact;}
+}
+@media (max-width:900px) {
+ .ncv-page-frame {width:min(210mm + 10px,calc(100% - 15px));}
+ .ncv-paper {width:100%;height:auto;min-height:0;max-height:none;padding:29px 29px 24px;}
+ .ncv-header::before,.ncv-job::before {left:-29px;}
+ .ncv-header {gap:12px;}
+ .ncv-toolbar {width:calc(100% - 23px);}
+ .ncv-footer {margin-top:27px;}
+}
+@media (max-width:600px) {
+ .ncv-shell {padding:0 0 10px;}
+ .ncv-stack {gap:12px;}
+ .ncv-paper {padding:25px 21px 22px;}
+ .ncv-header {grid-template-columns:1fr;gap:14px;margin-bottom:19px;}
+ .ncv-header::before,.ncv-job::before {left:-21px;}
+ .ncv-header::before {height:32px;}
+ .ncv-contact {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px;row-gap:7px;margin-top:0;padding:12px 0 0;border-left:0;border-top:1px solid #b9c4cc;}
+ .ncv-contact-line {font-size:11.4px;margin:0;gap:6px;}
+ .ncv-contact-icon {width:13px;height:13px;min-width:13px;}
+ .ncv-name {font-size:23px;}
+ .ncv-summary {font-size:12.5px;line-height:1.6;}
+ .ncv-skill-chip {font-size:11.7px;line-height:1.45;}
+ .ncv-section-title {font-size:14.6px;}
+ .ncv-list li {font-size:12.2px;line-height:1.6;}
+ .ncv-two-col {gap:9px;}
+ .ncv-language-grid {gap:7px;}
+ .ncv-language-item em {font-size:10.5px;}
+ .ncv-project p {font-size:11.8px;line-height:1.5;}
+ .ncv-cert-item {font-size:11.6px;line-height:1.5;}
+ .ncv-toolbar {flex-wrap:wrap;gap:7px;padding:10px 3px;}
+ .ncv-toolbar a {font-size:10px;padding:8px 8px;}
+ .ncv-toolbar .ncv-tools {gap:5px;}
+}
+@media (max-width:390px) {
+ .ncv-two-col {grid-template-columns:1fr;}
+ .ncv-contact {grid-template-columns:1fr;}
+ .ncv-language-grid {grid-template-columns:1fr;}
+}
