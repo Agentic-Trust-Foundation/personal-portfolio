@@ -91,7 +91,7 @@ The CV terminal offers two optional Bonus commands: `cv play snake` (in-terminal
 
 Cat spritesheet and sprite-frame references: **adryd325/oneko.js** (copyright © 2022 adryd, MIT). The sprite is stored locally at `public/oneko.gif` and the license notice is preserved at `licenses/oneko-js-MIT.txt`. The cursor mouse SVG is independently authored for this portfolio.
 
-## AI Ops Playground (isolated Preview, **not released to Production**)
+## AI Ops Playground (published; optional AI still disconnected)
 
 The yellow terminal window control minimizes into a developer desktop, with a restore button in a dock. The green control maximizes/restores the terminal. The red dot does not close the CV. The same command history, typing, Snake and theme are preserved when minimizing and restoring (Snake ticking is suspended while minimized).
 
@@ -101,6 +101,12 @@ The playground is a **browser-only simulator**, with visibly labeled synthetic R
 - Tests cover simulations, return to the original CV, prompt controls, no-network fallback and theme.
 - Current production rollback anchor: Git SHA `6f2ea945ad1f2778ed26fd231c64ba73a863a683`, branch `backup/pre-ai-playground-2026-11-19`, Vercel deployment `dpl_ASwQwaEGyFkTE5yKbzHoiAY9avqq`.
 - **Cloudflare Workers AI:** a separate, disabled-by-default Free-only intent router lives in `cloudflare/ai-ops-worker/`. Account registration, Free-plan verification, origin lock, Worker deployment, and enabling the client endpoint all require separate owner approval. **No Cloudflare Worker has been deployed and no billing enabled by this PR.**
-- No merge to `main` until the owner evaluates the Preview and explicitly likes it. If not, close the PR and simply continue using the preserved production version.
+- The owner approved the desktop and PR #10 is on `main`. Follow-up enhancements are developed and CI-tested in PR #11; no Cloudflare inference is enabled by them.
 
 For hard safety requirements, read [AI Ops Worker setup](cloudflare/ai-ops-worker/README.md) and [Preview acceptance checklist](docs/AI_OPS_PREVIEW.md).
+
+## Owner-controlled AI availability and CI/CD scenarios
+
+AI is controlled **only by the site owner**, in Cloudflare's authenticated Worker Settings through `AI_ENABLED=true/false`. The public frontend has **no online/offline toggle**. A read-only `GET /status` signal updates the visitor display to either `CLOUDFLARE AI · OWNER ENABLED` or `OFFLINE DEMO`. No Worker is deployed and no Vercel AI endpoint is configured today, so the public site remains offline. When switched OFF, the Worker rejects new inference requests; all dashboards continue simulating locally at $0 AI usage. See the [owner runbook](cloudflare/ai-ops-worker/README.md).
+
+Kubernetes cards visualize CPU load through rotating fan indicators. Synthetic load increases fan speed/count and replica count. Every CI/CD demo run gets a new version candidate. Successful candidates become the deployed version; representative failures at v1.8.5 (Build) and v1.8.9 (Security) do not promote a bad release. Variable durations and subsequent recovery illustrate normal DevOps failure/retry flows. Reset returns to v1.8.2. These are synthetic, reproducible demonstration incidents, not real production telemetry.

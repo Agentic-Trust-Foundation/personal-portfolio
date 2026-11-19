@@ -155,6 +155,22 @@ describe("AI Ops workspace preview", () => {
     expect(fetchSpy.mock.calls.filter(([, opts]) => (opts as RequestInit)?.method === "POST")).toHaveLength(1);
     expect(host.textContent).toContain("972");
   });
+  it("shows animated CPU fan indicators that scale with synthetic workload", async () => {
+    expect(host.querySelectorAll(".ops-fan-shell")).toHaveLength(3);
+    await click("Spike traffic");
+    expect(host.querySelectorAll(".ops-fan-shell")).toHaveLength(8);
+    expect(host.querySelectorAll(".ops-cpu-fans-busy")).toHaveLength(3);
+    await click("Normal");
+    expect(host.querySelectorAll(".ops-fan-shell")).toHaveLength(3);
+  });
+  it("shows a new CI/CD candidate and resets the deployed version", async () => {
+    await click("RUN DEMO");
+    expect(host.textContent).toContain("v1.8.3");
+    expect(host.textContent).toContain("BUILDING CANDIDATE");
+    await click("Reset demo workspace");
+    expect(host.textContent).toContain("v1.8.2");
+    expect(host.textContent).not.toContain("BUILDING CANDIDATE");
+  });
   it("offers a working dock to restore the CV and a theme toggle", async () => {
     await click("Restore CV terminal");
     await click("Toggle desktop light and dark theme");
