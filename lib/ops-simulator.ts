@@ -67,9 +67,11 @@ export function labMetrics(state: LabState) {
 export function chartPoints(state: LabState, count = 36): number[] {
   const high = state.traffic === "surge";
   return Array.from({ length: count }, (_, i) => {
-    const wave = Math.sin((i + state.tick) * .61) * 11 + Math.cos(i * .23) * 8;
-    const rising = high ? (i < count * .55 ? i * 7 : 190) : 0;
-    return Math.round(130 + rising + wave + (i % 7 === 0 ? 15 : 0));
+    const wave = Math.sin((i + state.tick) * .61) * 21 + Math.cos(i * .23) * 15;
+    const load = high
+      ? (i < count * .6 ? 250 + 720 * (i / (count * .6)) : 970)
+      : 246;
+    return Math.max(0, Math.round(load + wave + (i % 7 === 0 ? 24 : 0)));
   });
 }
 export function inferLabIntent(text: string): LabIntent | null {

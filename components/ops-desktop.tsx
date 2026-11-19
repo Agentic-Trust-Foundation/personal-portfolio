@@ -57,7 +57,7 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle }:
 
   const samples = useMemo(() => chartPoints(lab), [lab]);
   const graph = useMemo(() => samples.map((value, index) =>
-    `${(index * 100 / (samples.length - 1)).toFixed(2)},${(100 - value * .24).toFixed(2)}`
+    `${(index * 100 / (samples.length - 1)).toFixed(2)},${(94 - value * .085).toFixed(2)}`
   ).join(" "), [samples]);
 
   const appendResponse = (input: string, reply: string, via: Message["via"]) => {
@@ -142,7 +142,7 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle }:
               <h1>AI & Platform <em>Playground.</em></h1>
               <p className="ops-intro-text">What happens when traffic spikes or a new version ships? Try it. Watch the system respond. Ask the little lab assistant.</p>
             </div>
-            <div className="ops-intro-right"><span className="ops-intro-index">SYSTEM STATUS</span><div className="ops-overview-status"><span /> LAB HEALTHY</div><small>3 NODES / SANDBOX</small></div>
+            <div className="ops-intro-right"><span className="ops-intro-index">SYSTEM STATUS</span><div className="ops-overview-status"><span /> {isDeploying ? "ROLLING UPDATE" : lab.traffic === "surge" ? "AUTOSCALING" : "LAB HEALTHY"}</div><small>3 NODES / SANDBOX</small></div>
           </div>
           <div className="ops-dashboard">
             <article id="ops-monitoring" className={`ops-panel ops-monitoring ${focusPanel === "monitoring" ? "ops-panel-focused" : ""}`} aria-label="Observability dashboard">
