@@ -71,6 +71,106 @@ describe("AI Ops workspace preview", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(host.textContent).toContain("synthetic");
   });
+  const typePrompt = async (value: string) => {
+    const input = host.querySelector<HTMLInputElement>("#ops-agent-input");
+    if (!input) throw new Error("Missing assistant input");
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+    if (!setter) throw new Error("Missing input setter");
+    await act(async () => {
+      setter.call(input, value);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => {
+      host.querySelector<HTMLFormElement>(".ops-agent-form")?.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true })
+      );
+      await Promise.resolve();
+    });
+  };
+  const configured = async () => {
+    await act(async () => {
+      root.render(<OpsDesktop visible theme="dark" onRestore={onRestore}
+        onThemeToggle={onThemeToggle} aiEndpoint="https://example.workers.dev/intent" />);
+      await Promise.resolve();
+    });
+  };
+  it("shows no visitor on/off switch and remains offline without an owner status signal", async () => {
+    const fetchSpy = vi.fn(async () => ({ ok: false, status: 503 }));
+    vi.stubGlobal("fetch", fetchSpy);
+    await configured();
+    expect(host.querySelectorAll(".ops-ai-mode-buttons")).toHaveLength(0);
+    expect(host.querySelectorAll("button[aria-label*='Cloudflare AI']")).toHaveLength(0);
+    expect(host.textContent).toContain("OFFLINE DEMO");
+    await typePrompt("increase traffic");
+    expect(fetchSpy.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(fetchSpy.mock.calls.every(([, options]) => (options as RequestInit)?.method !== "POST")).toBe(true);
+    expect(host.textContent).toContain("972");
+  });
+  it("uses Cloudflare when the OWNER enables it, not through a visitor switch", async () => {
+    const fetchSpy = vi.fn(async (_url: string, options?: RequestInit) =>
+      options?.method === "GET"
+        ? { ok: true, json: async () => ({ mode: "online", aiEnabled: true }) }
+        : { ok: true, json: async () => ({ action: "surge", reply: "Synthetic traffic increased." }) }
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+    await configured();
+    expect(host.textContent).toContain("CLOUDFLARE AI · OWNER ENABLED");
+    await typePrompt("increase traffic");
+    expect(fetchSpy.mock.calls.filter(([, opts]) => (opts as RequestInit)?.method === "POST")).toHaveLength(1);
+    expect(host.textContent).toContain("972");
+    expect(host.querySelectorAll(".ops-ai-mode-buttons")).toHaveLength(0);
+  });
+  it("switches all visitors to offline after owner disables the Worker", async () => {
+    let enabled = true;
+    const fetchSpy = vi.fn(async (_url: string, options?: RequestInit) =>
+      options?.method === "GET"
+        ? { ok: true, json: async () => ({ mode: enabled ? "online" : "offline", aiEnabled: enabled }) }
+        : { ok: true, json: async () => ({ action: "inspect", reply: "Synthetic inspection." }) }
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+    await configured();
+    expect(host.textContent).toContain("OWNER ENABLED");
+    enabled = false;
+    await act(async () => {
+      document.dispatchEvent(new Event("visibilitychange"));
+      await Promise.resolve();
+    });
+    expect(host.textContent).toContain("OFFLINE DEMO");
+    await typePrompt("show status");
+    expect(fetchSpy.mock.calls.filter(([, opts]) => (opts as RequestInit)?.method === "POST")).toHaveLength(0);
+    expect(host.textContent).toContain("synthetic");
+  });
+  it("falls back locally on a server-side disabled response even if status was previously enabled", async () => {
+    const fetchSpy = vi.fn(async (_url: string, options?: RequestInit) =>
+      options?.method === "GET"
+        ? { ok: true, json: async () => ({ mode: "online", aiEnabled: true }) }
+        : { ok: false, status: 503 }
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+    await configured();
+    await typePrompt("show status");
+    expect(host.textContent).toContain("OFFLINE DEMO");
+    expect(host.textContent).toContain("Switched to the local demo");
+    await typePrompt("increase traffic");
+    expect(fetchSpy.mock.calls.filter(([, opts]) => (opts as RequestInit)?.method === "POST")).toHaveLength(1);
+    expect(host.textContent).toContain("972");
+  });
+  it("shows animated CPU fan indicators that scale with synthetic workload", async () => {
+    expect(host.querySelectorAll(".ops-fan-shell")).toHaveLength(3);
+    await click("Spike traffic");
+    expect(host.querySelectorAll(".ops-fan-shell")).toHaveLength(8);
+    expect(host.querySelectorAll(".ops-cpu-fans-busy")).toHaveLength(3);
+    await click("Normal");
+    expect(host.querySelectorAll(".ops-fan-shell")).toHaveLength(3);
+  });
+  it("shows a new CI/CD candidate and resets the deployed version", async () => {
+    await click("RUN DEMO");
+    expect(host.textContent).toContain("v1.8.3");
+    expect(host.textContent).toContain("BUILDING CANDIDATE");
+    await click("Reset demo workspace");
+    expect(host.textContent).toContain("v1.8.2");
+    expect(host.textContent).not.toContain("BUILDING CANDIDATE");
+  });
   it("offers a working dock to restore the CV and a theme toggle", async () => {
     await click("Restore CV terminal");
     await click("Toggle desktop light and dark theme");

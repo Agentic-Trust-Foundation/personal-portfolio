@@ -137,3 +137,13 @@ Confirm Vercel team authorization, connect the Git repository when approved, dep
 - Vercel PR Preview: require READY and HTTP checks for `/`, `/resume/`, `/resume.pdf`.
 - Desktop visual/browser QA (especially minimize/restore on mobile) remains independent of unit tests and HTTP checks; obtain owner's feedback before any production release.
 - Cloudflare Workers AI: NOT DEPLOYED, NOT CONNECTED, NOT REQUESTED TO INFER. Verify Free plan manually and only enable after explicit separate approval.
+
+## 2026-11-19 — Owner-only AI and realistic laboratory simulation (PR #11)
+
+- Owner clarified there must be **NO visitor-facing online/offline toggle**. Frontend starts in `OFFLINE DEMO`; only the authenticated Cloudflare owner's `AI_ENABLED` switch can change the global mode. Vercel does NOT host a public admin action or store Cloudflare admin credentials.
+- Read-only Worker `GET /status` (exact-origin CORS, no inference) reveals owner mode; UI checks it at first workspace opening and periodically while visible, and shows `CLOUDFLARE AI · OWNER ENABLED` only when confirmed. New `POST /intent` requests fail closed under the kill switch.
+- Actual Worker account, Workers Free plan and model eligibility remain **UNVERIFIED**; Worker **NOT DEPLOYED** and no Vercel endpoint configured. Production remains fully Offline at present. There is no paid fallback.
+- Synthetic Kubernetes nodes contain animated CPU fan indicators, growing from 1/node to [3,2,3] on load surge, with faster animation; respects reduced-motion.
+- CI/CD runs use version candidates `v1.8.3`, `v1.8.4`, `v1.8.5`, etc. Candidate v1.8.5 fails Build and v1.8.9 fails Security. Failure keeps the previously deployed version; retries use the next candidate and may recover. Stage delays differ, with some slow builds, and failed stages turn red instead of green.
+- Reset always returns to v1.8.2, with cleared history and original synthetic lab health. These are illustrative scripted incidents, never actual builds or vulnerabilities.
+- PR #11 is developed on `feat/ops-ai-mode-toggle` and must pass CI/Preview before merging. Existing Production baseline `60e5113d60935544624a68e5cb23f717250b2980` remains available; older pre-desktop backup is `backup/pre-ai-playground-2026-11-19`.

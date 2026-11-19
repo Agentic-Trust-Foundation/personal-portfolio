@@ -30,6 +30,44 @@ describe("Free-only Cloudflare Worker (all AI mocked)", () => {
     expect(response.status).toBe(503);
     expect(e.AI.run).not.toHaveBeenCalled();
   });
+  it("owner kill switch blocks AI immediately regardless of visitor online choice", async () => {
+    const e = env();
+    expect((await worker.fetch(request(), e)).status).toBe(200);
+    expect(e.AI.run).toHaveBeenCalledTimes(1);
+    e.AI_ENABLED = "false";
+    expect((await worker.fetch(request(), e)).status).toBe(503);
+    expect(e.AI.run).toHaveBeenCalledTimes(1);
+  });
+  it("returns public read-only owner status without running inference", async () => {
+    const disabled = env({ AI_ENABLED: "false" });
+    const req = new Request("https://test.workers.dev/status", {
+      method: "GET", headers: { Origin: "https://approved-preview.vercel.app" },
+    });
+    const response = await worker.fetch(req, disabled);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ mode: "offline", aiEnabled: false });
+    expect(disabled.AI.run).not.toHaveBeenCalled();
+    const enabled = env();
+    const active = await worker.fetch(req, enabled);
+    expect(await active.json()).toEqual({ mode: "online", aiEnabled: true });
+    expect(enabled.AI.run).not.toHaveBeenCalled();
+    enabled.AI_ENABLED = "false";
+    const off = await worker.fetch(req, enabled);
+    expect(await off.json()).toEqual({ mode: "offline", aiEnabled: false });
+  });
+  it("cannot be switched on by a visitor or unauthorized origin", async () => {
+    const e = env({ AI_ENABLED: "false" });
+    const req = new Request("https://test.workers.dev/admin/enable", {
+      method: "POST",
+      headers: { Origin: "https://approved-preview.vercel.app", "Content-Type": "application/json" },
+      body: '{"AI_ENABLED":"true"}',
+    });
+    expect((await worker.fetch(req, e)).status).toBe(404);
+    expect((await worker.fetch(new Request("https://test.workers.dev/status", {
+      headers: { Origin: "https://evil.example" },
+    }), e)).status).toBe(403);
+    expect(e.AI.run).not.toHaveBeenCalled();
+  });
   it("rejects unauthorized origins without touching the model", async () => {
     const e = env();
     const response = await worker.fetch(request("raise traffic", "https://attacker.example"), e);

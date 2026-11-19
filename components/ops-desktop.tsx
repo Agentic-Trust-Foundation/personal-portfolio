@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   Activity, ArrowRight, ArrowUpRight, Boxes, Check, ChevronRight,
   CircleDot, Cpu, FileText, GitBranch, HeartPulse, Layers,
-  Play, RotateCcw, Send, Server, ShieldCheck, Sparkles,
+  Play, RotateCcw, Send, Server, ShieldCheck, Sparkles, X,
   Terminal, Workflow, Zap,
 } from "lucide-react";
 import {
@@ -13,9 +13,10 @@ import {
 } from "@/lib/ops-simulator";
 
 type Theme = "dark" | "light";
+type AiMode = "offline" | "online";
 type Message = { id: number; kind: "user" | "agent"; text: string; via?: "demo" | "cloudflare" };
 type Panel = "monitoring" | "cluster" | "pipeline" | "agent";
-type Props = { visible: boolean; theme: Theme; onRestore: () => void; onThemeToggle: () => void };
+type Props = { visible: boolean; theme: Theme; onRestore: () => void; onThemeToggle: () => void; aiEndpoint?: string };
 
 const AI_ENDPOINT = process.env.NEXT_PUBLIC_OPS_AI_ENDPOINT?.trim() || "";
 const AI_TURN_LIMIT = 3;
@@ -27,7 +28,7 @@ const SAMPLE_ACTIONS: { label: string; input: string; action: LabIntent }[] = [
 ];
 const NODE_NAMES = ["worker-01", "worker-02", "worker-03"];
 
-export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle }: Props) {
+export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle, aiEndpoint = AI_ENDPOINT }: Props) {
   const [lab, setLab] = useState(initialLab);
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState<Message[]>([
@@ -35,19 +36,85 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle }:
   ]);
   const [busy, setBusy] = useState(false);
   const [remoteUsed, setRemoteUsed] = useState(0);
+  // Owner-controlled Cloudflare status. Visitors have no mode toggle.
+  // Until the server confirms AI_ENABLED=true, everyone uses Offline Demo.
+  const [aiMode, setAiMode] = useState<AiMode>("offline");
+  const [aiBlocked, setAiBlocked] = useState(false);
+  const aiModeRef = useRef<AiMode>("offline");
+  const activeAiRequest = useRef<AbortController | null>(null);
   const [focusPanel, setFocusPanel] = useState<Panel>("agent");
   const scrollRef = useRef<HTMLDivElement>(null);
   const messageId = useRef(0);
   const msgBottomRef = useRef<HTMLDivElement>(null);
   const metrics = labMetrics(lab);
-  const isDeploying = lab.pipelineStep >= 0 && lab.pipelineStep < PIPELINE_STAGES.length;
-  const isAiConfigured = AI_ENDPOINT.startsWith("https://");
+  const isDeploying = lab.pipelineStatus === "running";
+  const isAiConfigured = aiEndpoint.startsWith("https://");
+  const aiOnline = isAiConfigured && !aiBlocked && remoteUsed < AI_TURN_LIMIT && aiMode === "online";
+
+  useEffect(() => {
+    // Abort any pending request if this screen is removed. An already running
+    // inference cannot be retroactively canceled at the provider.
+    return () => { activeAiRequest.current?.abort(); };
+  }, []);
+
+  useEffect(() => {
+    if (!visible || !isAiConfigured) return;
+    let alive = true;
+    let statusAbort: AbortController | null = null;
+    const checkOwnerStatus = async () => {
+      statusAbort?.abort();
+      const controller = new AbortController();
+      statusAbort = controller;
+      const timeout = window.setTimeout(() => controller.abort(), 4500);
+      try {
+        const statusUrl = new URL(aiEndpoint);
+        if (statusUrl.protocol !== "https:" || !statusUrl.pathname.endsWith("/intent")) {
+          throw new Error("Unexpected AI endpoint");
+        }
+        statusUrl.pathname = statusUrl.pathname.slice(0, -"/intent".length) + "/status";
+        const response = await fetch(statusUrl.toString(), {
+          method: "GET", cache: "no-store", signal: controller.signal,
+          headers: { "Accept": "application/json" },
+        });
+        const result: unknown = response.ok ? await response.json() : null;
+        const available = result && typeof result === "object" && "aiEnabled" in result &&
+          (result as { aiEnabled?: unknown }).aiEnabled === true &&
+          "mode" in result && (result as { mode?: unknown }).mode === "online";
+        if (!alive || controller.signal.aborted) return;
+        aiModeRef.current = available ? "online" : "offline";
+        setAiMode(aiModeRef.current);
+        if (!available) activeAiRequest.current?.abort();
+      } catch {
+        if (!alive || controller.signal.aborted && statusAbort !== controller) return;
+        aiModeRef.current = "offline";
+        setAiMode("offline");
+        activeAiRequest.current?.abort();
+      } finally {
+        window.clearTimeout(timeout);
+      }
+    };
+    void checkOwnerStatus();
+    // Status checks do not invoke AI. A slow poll avoids excess Worker reads;
+    // POST still rejects immediately when the owner server switch is OFF.
+    const interval = window.setInterval(() => {
+      if (!document.hidden) void checkOwnerStatus();
+    }, 180_000);
+    const onReturn = () => { if (!document.hidden) void checkOwnerStatus(); };
+    document.addEventListener("visibilitychange", onReturn);
+    return () => {
+      alive = false;
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onReturn);
+      statusAbort?.abort();
+    };
+  }, [visible, isAiConfigured, aiEndpoint]);
 
   useEffect(() => {
     if (!visible || !isDeploying) return;
-    const timer = window.setTimeout(() => setLab((previous) => advanceLab(previous)), 1150);
+    const delay = lab.durations[lab.pipelineStep] ?? 1150;
+    const timer = window.setTimeout(() => setLab((previous) => advanceLab(previous)), delay);
     return () => window.clearTimeout(timer);
-  }, [visible, isDeploying, lab.pipelineStep]);
+  }, [visible, isDeploying, lab.pipelineStep, lab.durations]);
 
   useEffect(() => {
     if (!visible) return;
@@ -84,32 +151,53 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle }:
 
     // No network calls until the owner explicitly configures the separate
     // free-only Cloudflare Worker. The local lab always remains usable.
-    if (!isAiConfigured || remoteUsed >= AI_TURN_LIMIT) {
+    if (!aiOnline) {
       runDemo(input);
       return;
     }
     setBusy(true);
     setRemoteUsed((count) => count + 1);
     const abort = new AbortController();
+    activeAiRequest.current = abort;
     const timer = window.setTimeout(() => abort.abort(), 6500);
     try {
-      const response = await fetch(AI_ENDPOINT, {
+      const response = await fetch(aiEndpoint, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: input }), signal: abort.signal,
       });
       if (!response.ok) throw new Error("Worker unavailable");
       const result: unknown = await response.json();
+      if (abort.signal.aborted || aiModeRef.current !== "online") {
+        // The visitor switched to Offline while the request was in flight.
+        runDemo(input);
+        return;
+      }
       if (!result || typeof result !== "object") throw new Error("Invalid result");
       const { action, reply } = result as { action?: unknown; reply?: unknown };
       const safe = VALID_INTENTS.includes(action as LabIntent) ? action as LabIntent : null;
       if (safe) setLab((previous) => runLabAction(previous, safe));
       appendResponse(input, typeof reply === "string" ? reply.slice(0, 250) : localLabReply(safe, lab), "cloudflare");
     } catch {
-      const action = inferLabIntent(input);
-      if (action) setLab((previous) => runLabAction(previous, action));
-      appendResponse(input, "Cloudflare AI is unavailable or out of free quota. Switched to the local demo. " + localLabReply(action, lab), "demo");
+      if (abort.signal.aborted && aiModeRef.current === "offline") {
+        // Manual OFF always wins; resolve this submitted prompt locally.
+        runDemo(input);
+      } else {
+        const action = inferLabIntent(input);
+        if (action) setLab((previous) => runLabAction(previous, action));
+        appendResponse(input, "Cloudflare AI is unavailable or out of free quota. Switched to the local demo. " + localLabReply(action, lab), "demo");
+        setAiBlocked(true);
+        aiModeRef.current = "offline";
+        setAiMode("offline");
+      }
     } finally {
       window.clearTimeout(timer);
+      if (activeAiRequest.current === abort) activeAiRequest.current = null;
+      if (remoteUsed + 1 >= AI_TURN_LIMIT) {
+        // These are convenience limits, not a billing boundary; the Free
+        // Cloudflare plan and Worker-side kill switch remain mandatory.
+        aiModeRef.current = "offline";
+        setAiMode("offline");
+      }
       setBusy(false);
     }
   }
@@ -142,7 +230,7 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle }:
               <h1>AI & Platform <em>Playground.</em></h1>
               <p className="ops-intro-text">What happens when traffic spikes or a new version ships? Try it. Watch the system respond. Ask the little lab assistant.</p>
             </div>
-            <div className="ops-intro-right"><span className="ops-intro-index">SYSTEM STATUS</span><div className="ops-overview-status"><span /> {isDeploying ? "ROLLING UPDATE" : lab.traffic === "surge" ? "AUTOSCALING" : "LAB HEALTHY"}</div><small>3 NODES / SANDBOX</small></div>
+            <div className="ops-intro-right"><span className="ops-intro-index">SYSTEM STATUS</span><div className="ops-overview-status"><span /> {isDeploying ? "PIPELINE RUNNING" : lab.pipelineStatus === "failed" ? "RELEASE BLOCKED" : lab.traffic === "surge" ? "AUTOSCALING" : "LAB HEALTHY"}</div><small>3 NODES / SANDBOX</small></div>
           </div>
           <div className="ops-dashboard">
             <article id="ops-monitoring" className={`ops-panel ops-monitoring ${focusPanel === "monitoring" ? "ops-panel-focused" : ""}`} aria-label="Observability dashboard">
@@ -179,6 +267,13 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle }:
                   return (
                     <div key={name} className="ops-node">
                       <div className="ops-node-head"><Server size={13}/><span>{name}</span><i/></div>
+                      <div className={`ops-cpu-fans ${lab.traffic === "surge" ? "ops-cpu-fans-busy" : ""}`} aria-label={`${metrics.fansPerNode[index]} animated CPU fan indicators on ${name}`}>
+                        {Array.from({ length: metrics.fansPerNode[index] }, (_, fan) => (
+                          <span key={fan} className="ops-fan-shell" title="Synthetic CPU load · rotating cooling fan">
+                            <span className="ops-fan-rotor" aria-hidden="true"><i/><i/><i/><i/></span>
+                          </span>
+                        ))}
+                      </div>
                       <div className="ops-pods">{Array.from({ length: pods }, (_, p) => <span className={`ops-pod ${isDeploying && lab.pipelineStep === 3 && index === 2 && p === 0 ? "ops-pod-updating" : ""}`} key={p} title="demo-web pod (simulated)"><Cpu size={11}/></span>)}</div>
                     </div>
                   );
@@ -193,28 +288,53 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle }:
 
             <article id="ops-pipeline" className={`ops-panel ops-pipeline ${focusPanel === "pipeline" ? "ops-panel-focused" : ""}`} aria-label="CI/CD pipeline simulation">
               <div className="ops-panel-header"><div className="ops-panel-title"><GitBranch size={17}/><span>CI / CD</span><span className="ops-panel-sub">/ DELIVERY</span></div><span className="ops-panel-indicator"><i/> SIMULATED</span></div>
-              <div className="ops-pipeline-overview"><div><span className="ops-cluster-caption">LATEST RELEASE</span><strong>{lab.version}</strong><small>demo-web · main</small></div><button className="ops-run" type="button" onClick={() => setLab((p) => runLabAction(p, "deploy"))} disabled={isDeploying}><Play size={13} fill="currentColor"/>{isDeploying ? "RUNNING..." : "RUN DEMO"}</button></div>
+              <div className="ops-pipeline-overview"><div><span className="ops-cluster-caption">DEPLOYED VERSION</span><strong>{lab.version}</strong><small>demo-web · main</small>
+                {lab.candidateVersion && <div className={`ops-candidate ops-candidate-${lab.pipelineStatus}`} aria-live="polite">
+                  {lab.pipelineStatus === "running" ? "BUILDING" : lab.pipelineStatus === "failed" ? "FAILED" : "SHIPPED"} CANDIDATE {lab.candidateVersion}
+                </div>}</div>
+                <button className="ops-run" type="button" onClick={() => setLab((p) => runLabAction(p, "deploy"))} disabled={isDeploying}>
+                  <Play size={13} fill="currentColor"/>{isDeploying ? "RUNNING..." : lab.pipelineStatus === "failed" ? "FIX & RETRY" : lab.attempt > 0 ? "RUN NEXT" : "RUN DEMO"}
+                </button>
+              </div>
               <div className="ops-stages">
                 {PIPELINE_STAGES.map((stage, index) => {
-                  const done = lab.pipelineStep === PIPELINE_STAGES.length || (lab.pipelineStep > index);
-                  const active = lab.pipelineStep === index;
-                  return <div className={`ops-stage ${done ? "ops-stage-done" : ""} ${active ? "ops-stage-active" : ""}`} key={stage}><div className="ops-stage-icon">{done ? <Check size={13}/> : active ? <span className="ops-stage-pulse"/> : <span className="ops-stage-index">{index + 1}</span>}</div><span>{stage}</span></div>;
+                  const done = lab.pipelineStatus === "success" || lab.pipelineStep > index;
+                  const active = lab.pipelineStatus === "running" && lab.pipelineStep === index;
+                  const failed = lab.pipelineStatus === "failed" && lab.failedStage === index;
+                  return <div className={`ops-stage ${done ? "ops-stage-done" : ""} ${active ? "ops-stage-active" : ""} ${failed ? "ops-stage-failed" : ""}`} key={stage}>
+                    <div className="ops-stage-icon">{failed ? <X size={13}/> : done ? <Check size={13}/> : active ? <span className="ops-stage-pulse"/> : <span className="ops-stage-index">{index + 1}</span>}</div><span>{stage}</span>
+                  </div>;
                 })}
               </div>
               <div className="ops-event-feed"><div className="ops-event-title">RECENT ACTIVITY <span>LOCAL EVENTS ONLY</span></div>
-                {lab.events.slice(0, 3).map((ev) => <div className="ops-event" key={ev.id}><span className={`ops-event-dot ops-event-${ev.kind}`}/><span>{ev.message}</span></div>)}
+                {lab.events.slice(0, 4).map((ev) => <div className="ops-event" key={ev.id}><span className={`ops-event-dot ops-event-${ev.kind}`}/><span>{ev.message}</span></div>)}
               </div>
             </article>
 
             <article id="ops-agent" className={`ops-panel ops-agent ${focusPanel === "agent" ? "ops-panel-focused" : ""}`} aria-label="AI lab assistant">
-              <div className="ops-panel-header"><div className="ops-panel-title"><Sparkles size={17}/><span>Workspace Agent</span></div><span className="ops-ai-status">{isAiConfigured && remoteUsed < AI_TURN_LIMIT ? "CLOUDFLARE READY" : "OFFLINE DEMO"}</span></div>
-              <div className="ops-ai-intro"><div className="ops-avatar"><Sparkles size={21}/></div><div><strong>Ask me to try something.</strong><p>I can guide the local simulation. Real Cloudflare AI is {isAiConfigured ? "configured with a limited budget." : "not connected yet."}</p></div></div>
+              <div className="ops-panel-header"><div className="ops-panel-title"><Sparkles size={17}/><span>Workspace Agent</span></div><span className="ops-ai-status" aria-live="polite">{aiOnline ? "CLOUDFLARE AI · OWNER ENABLED" : "OFFLINE DEMO"}</span></div>
+              <div className="ops-ai-mode-control" role="status" aria-live="polite">
+                <span>AI AVAILABILITY</span>
+                <span className={`ops-ai-mode-label ${aiOnline ? "ops-ai-mode-label-online" : ""}`}>
+                  <span className="ops-ai-mode-dot" aria-hidden="true"/>
+                  {aiOnline ? "AI ENABLED BY SITE OWNER" : "OFFLINE · OWNER CONTROLLED"}
+                </span>
+              </div>
+              <div className="ops-ai-intro"><div className="ops-avatar"><Sparkles size={21}/></div><div><strong>Ask me to try something.</strong><p>{aiOnline ? "Cloudflare AI was enabled by the site owner. Quick actions remain local." : "Offline demo: commands run locally; only the site owner can enable Cloudflare AI."}</p></div></div>
               <div className="ops-ai-chips">{SAMPLE_ACTIONS.map((item) => <button key={item.label} type="button" onClick={() => runDemo(item.input, item.action)}>{item.label}<ArrowUpRight size={13}/></button>)}</div>
               <div className="ops-messages" role="log" aria-live="polite">{messages.slice(-5).map((message) =>
                 <div className={`ops-msg ops-msg-${message.kind}`} key={message.id}><span>{message.kind === "agent" ? "LAB" : "YOU"}</span><p>{message.text}</p></div>
               )}<div ref={msgBottomRef}/></div>
               <form className="ops-agent-form" onSubmit={submitPrompt}><label htmlFor="ops-agent-input" className="sr-only">Ask the ops lab assistant</label><input id="ops-agent-input" value={prompt} onChange={(event) => setPrompt(event.target.value)} disabled={busy} maxLength={240} placeholder="Try: increase traffic, deploy, show status..." autoComplete="off"/><button type="submit" disabled={!prompt.trim() || busy} aria-label="Send command to ops lab"><Send size={16}/></button></form>
-              <div className="ops-ai-foot"><ShieldCheck size={13}/> {isAiConfigured ? `Cloudflare Free-only · ${AI_TURN_LIMIT - Math.min(remoteUsed, AI_TURN_LIMIT)} AI requests left this visit · demo fallback` : "Local simulation · $0 API usage · no credentials required"}</div>
+              <div className="ops-ai-foot"><ShieldCheck size={13}/> {aiOnline
+                ? `Cloudflare AI · owner enabled · ${AI_TURN_LIMIT - Math.min(remoteUsed, AI_TURN_LIMIT)} requests left this visit`
+                : !isAiConfigured
+                  ? "Offline · $0 AI usage · Cloudflare not connected yet"
+                  : aiBlocked
+                    ? "Offline · Cloudflare unavailable or quota exhausted for this visit"
+                    : remoteUsed >= AI_TURN_LIMIT
+                      ? "Offline · visit limit reached · no more AI requests"
+                      : "Offline · Cloudflare controlled by site owner"}</div>
             </article>
           </div>
 

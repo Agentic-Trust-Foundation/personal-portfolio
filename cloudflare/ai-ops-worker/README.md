@@ -35,8 +35,34 @@ IDs, tokens, Worker URLs or Cloudflare secrets.
 ## Validation before enabling
 
 - Verify empty origin fails closed and unknown origin is rejected.
-- Verify GET and malformed/oversized JSON do not invoke AI.
+- Verify GET /status returns only the owner's mode and does not invoke AI; malformed/oversized POST JSON is rejected.
 - Verify origin preflight is restricted to POST and Content-Type.
 - Verify one successful allowed request returns only a safe action.
 - Verify 429 and depleted free Neurons show local-only fallback.
 - Observe real Cloudflare Free account usage (Neurons/day) before increasing limits.
+
+## Owner-only On / Off runbook
+
+**Visitors do not have any AI switch or administrator controls.** The Workspace Agent displays a read-only indicator, `OFFLINE DEMO` or `CLOUDFLARE AI · OWNER ENABLED`. On each new visit it starts offline. If an endpoint is configured, the frontend checks `GET /status` (read-only, zero inference) and periodically refreshes status while the workspace is visible. If the owner changes the settings, visiting users see the new mode after the next status refresh, or sooner when reopening the workspace/tab.
+
+**Owner authority: Cloudflare Dashboard only.** This portfolio has no separate authenticated administration panel. A public frontend cannot change `AI_ENABLED` and no `/admin/enable` endpoint exists.
+
+### Turn OFF globally
+1. Open your authenticated Cloudflare Dashboard → **Workers & Pages** → **hossein-ai-ops-free-lab** → **Settings** → **Variables and Secrets**.
+2. Set `AI_ENABLED=false`, save and deploy the settings. All **new** `POST /intent` requests will receive HTTP 503 with **zero inference**, regardless of frontend state. `GET /status` returns `{"mode":"offline","aiEnabled":false}`.
+3. The site continues as the browser-only simulator. Existing model requests already started before the change may finish; the cutoff applies to new requests after deployment takes effect.
+
+### Turn ON globally (only after separate verification)
+1. Verify the actual Cloudflare account is **Workers Free**, not a paid or prepaid plan, and the pinned model is Free eligible. Do not add any payment method for this experiment.
+2. Configure exactly one approved origin and a safe Worker endpoint in the intended Vercel environment, then redeploy the site if necessary. `NEXT_PUBLIC_OPS_AI_ENDPOINT` is a public endpoint URL, never a credential.
+3. In authenticated Cloudflare Settings, set `PLAN_ASSERTED_FREE=true`, `AI_ENABLED=true`, and deploy. The site will automatically display `CLOUDFLARE AI · OWNER ENABLED` when `GET /status` confirms both flags. The site visitor cannot override the owner's choice.
+4. If quota is exhausted, the Worker returns 503/429; the website falls back to Offline Demo and does not retry inference automatically.
+
+The frontend checks status at most every three minutes while visible, plus when a hidden tab returns. Checking status itself uses a free Worker request but never Workers AI inference. Global rate limits in the Worker are **per POP** and not an exact worldwide budget; the verified Workers Free account must be the final no-overage boundary.
+
+Official documentation:
+- https://developers.cloudflare.com/workers/configuration/environment-variables/
+- https://developers.cloudflare.com/workers-ai/platform/pricing/
+- https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
+
+**Current deployment:** This Worker has NOT been deployed; no Cloudflare account or billing plan has been verified in this chat. The Vercel site stays in Offline Demo by default.
