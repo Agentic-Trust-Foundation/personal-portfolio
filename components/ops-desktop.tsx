@@ -66,7 +66,7 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle }:
       { id: ++messageId.current, kind: "user", text: input },
       { id: ++messageId.current, kind: "agent", text: reply, via },
     ]);
-    window.requestAnimationFrame(() => msgBottomRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }));
+    window.requestAnimationFrame(() => msgBottomRef.current?.scrollIntoView?.({ block: "nearest", behavior: "smooth" }));
   };
 
   const runDemo = (input: string, forced?: LabIntent) => {
@@ -116,7 +116,7 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle }:
 
   function openPanel(panel: Panel) {
     setFocusPanel(panel);
-    scrollRef.current?.querySelector("#ops-" + panel)?.scrollIntoView({
+    scrollRef.current?.querySelector("#ops-" + panel)?.scrollIntoView?.({
       behavior: "smooth", block: "nearest", inline: "nearest",
     });
   }
