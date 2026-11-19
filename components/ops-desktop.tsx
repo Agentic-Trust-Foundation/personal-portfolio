@@ -13,9 +13,10 @@ import {
 } from "@/lib/ops-simulator";
 
 type Theme = "dark" | "light";
+type AiMode = "offline" | "online";
 type Message = { id: number; kind: "user" | "agent"; text: string; via?: "demo" | "cloudflare" };
 type Panel = "monitoring" | "cluster" | "pipeline" | "agent";
-type Props = { visible: boolean; theme: Theme; onRestore: () => void; onThemeToggle: () => void };
+type Props = { visible: boolean; theme: Theme; onRestore: () => void; onThemeToggle: () => void; aiEndpoint?: string };
 
 const AI_ENDPOINT = process.env.NEXT_PUBLIC_OPS_AI_ENDPOINT?.trim() || "";
 const AI_TURN_LIMIT = 3;
@@ -27,7 +28,7 @@ const SAMPLE_ACTIONS: { label: string; input: string; action: LabIntent }[] = [
 ];
 const NODE_NAMES = ["worker-01", "worker-02", "worker-03"];
 
-export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle }: Props) {
+export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle, aiEndpoint = AI_ENDPOINT }: Props) {
   const [lab, setLab] = useState(initialLab);
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState<Message[]>([
@@ -35,13 +36,37 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle }:
   ]);
   const [busy, setBusy] = useState(false);
   const [remoteUsed, setRemoteUsed] = useState(0);
+  // Per-visit opt-in. Even when a Worker URL is configured, never call AI
+  // without a deliberate visitor choice; page refresh resets to offline.
+  const [aiMode, setAiMode] = useState<AiMode>("offline");
+  const [aiBlocked, setAiBlocked] = useState(false);
+  const aiModeRef = useRef<AiMode>("offline");
+  const activeAiRequest = useRef<AbortController | null>(null);
   const [focusPanel, setFocusPanel] = useState<Panel>("agent");
   const scrollRef = useRef<HTMLDivElement>(null);
   const messageId = useRef(0);
   const msgBottomRef = useRef<HTMLDivElement>(null);
   const metrics = labMetrics(lab);
   const isDeploying = lab.pipelineStep >= 0 && lab.pipelineStep < PIPELINE_STAGES.length;
-  const isAiConfigured = AI_ENDPOINT.startsWith("https://");
+  const isAiConfigured = aiEndpoint.startsWith("https://");
+  const onlineAvailable = isAiConfigured && !aiBlocked && remoteUsed < AI_TURN_LIMIT;
+  const aiOnline = onlineAvailable && aiMode === "online";
+
+  useEffect(() => {
+    // Abort any pending request if this screen is removed. This does not
+    // guarantee cancellation of inference already running at the provider.
+    return () => { activeAiRequest.current?.abort(); };
+  }, []);
+
+  function chooseAiMode(next: AiMode) {
+    if (next === "online" && !onlineAvailable) return;
+    aiModeRef.current = next;
+    setAiMode(next);
+    if (next === "offline") {
+      activeAiRequest.current?.abort();
+      activeAiRequest.current = null;
+    }
+  }
 
   useEffect(() => {
     if (!visible || !isDeploying) return;
@@ -84,32 +109,53 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle }:
 
     // No network calls until the owner explicitly configures the separate
     // free-only Cloudflare Worker. The local lab always remains usable.
-    if (!isAiConfigured || remoteUsed >= AI_TURN_LIMIT) {
+    if (!aiOnline) {
       runDemo(input);
       return;
     }
     setBusy(true);
     setRemoteUsed((count) => count + 1);
     const abort = new AbortController();
+    activeAiRequest.current = abort;
     const timer = window.setTimeout(() => abort.abort(), 6500);
     try {
-      const response = await fetch(AI_ENDPOINT, {
+      const response = await fetch(aiEndpoint, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: input }), signal: abort.signal,
       });
       if (!response.ok) throw new Error("Worker unavailable");
       const result: unknown = await response.json();
+      if (abort.signal.aborted || aiModeRef.current !== "online") {
+        // The visitor switched to Offline while the request was in flight.
+        runDemo(input);
+        return;
+      }
       if (!result || typeof result !== "object") throw new Error("Invalid result");
       const { action, reply } = result as { action?: unknown; reply?: unknown };
       const safe = VALID_INTENTS.includes(action as LabIntent) ? action as LabIntent : null;
       if (safe) setLab((previous) => runLabAction(previous, safe));
       appendResponse(input, typeof reply === "string" ? reply.slice(0, 250) : localLabReply(safe, lab), "cloudflare");
     } catch {
-      const action = inferLabIntent(input);
-      if (action) setLab((previous) => runLabAction(previous, action));
-      appendResponse(input, "Cloudflare AI is unavailable or out of free quota. Switched to the local demo. " + localLabReply(action, lab), "demo");
+      if (abort.signal.aborted && aiModeRef.current === "offline") {
+        // Manual OFF always wins; resolve this submitted prompt locally.
+        runDemo(input);
+      } else {
+        const action = inferLabIntent(input);
+        if (action) setLab((previous) => runLabAction(previous, action));
+        appendResponse(input, "Cloudflare AI is unavailable or out of free quota. Switched to the local demo. " + localLabReply(action, lab), "demo");
+        setAiBlocked(true);
+        aiModeRef.current = "offline";
+        setAiMode("offline");
+      }
     } finally {
       window.clearTimeout(timer);
+      if (activeAiRequest.current === abort) activeAiRequest.current = null;
+      if (remoteUsed + 1 >= AI_TURN_LIMIT) {
+        // These are convenience limits, not a billing boundary; the Free
+        // Cloudflare plan and Worker-side kill switch remain mandatory.
+        aiModeRef.current = "offline";
+        setAiMode("offline");
+      }
       setBusy(false);
     }
   }
@@ -207,14 +253,33 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle }:
             </article>
 
             <article id="ops-agent" className={`ops-panel ops-agent ${focusPanel === "agent" ? "ops-panel-focused" : ""}`} aria-label="AI lab assistant">
-              <div className="ops-panel-header"><div className="ops-panel-title"><Sparkles size={17}/><span>Workspace Agent</span></div><span className="ops-ai-status">{isAiConfigured && remoteUsed < AI_TURN_LIMIT ? "CLOUDFLARE READY" : "OFFLINE DEMO"}</span></div>
-              <div className="ops-ai-intro"><div className="ops-avatar"><Sparkles size={21}/></div><div><strong>Ask me to try something.</strong><p>I can guide the local simulation. Real Cloudflare AI is {isAiConfigured ? "configured with a limited budget." : "not connected yet."}</p></div></div>
+              <div className="ops-panel-header"><div className="ops-panel-title"><Sparkles size={17}/><span>Workspace Agent</span></div><span className="ops-ai-status">{aiOnline ? "CLOUDFLARE AI · OPT-IN" : "OFFLINE DEMO"}</span></div>
+              <div className="ops-ai-mode-control" role="group" aria-label="AI assistant processing mode">
+                <span>ASSISTANT MODE</span>
+                <div className="ops-ai-mode-buttons">
+                  <button type="button" aria-label="Use Offline Demo without AI network requests"
+                    aria-pressed={!aiOnline} onClick={() => chooseAiMode("offline")}>Offline Demo</button>
+                  <button type="button" aria-label="Use Cloudflare AI for typed prompts"
+                    aria-pressed={aiOnline} disabled={!onlineAvailable}
+                    title={!isAiConfigured ? "Cloudflare Worker not connected — offline mode stays available" : aiBlocked ? "AI unavailable this visit — offline fallback is active" : remoteUsed >= AI_TURN_LIMIT ? "AI visit limit reached — offline mode is active" : "Opt in to Cloudflare AI for typed prompts only"}
+                    onClick={() => chooseAiMode("online")}>Cloudflare AI</button>
+                </div>
+              </div>
+              <div className="ops-ai-intro"><div className="ops-avatar"><Sparkles size={21}/></div><div><strong>Ask me to try something.</strong><p>{aiOnline ? "Your next typed prompt will use Cloudflare AI. Quick action buttons stay local." : "Offline demo: all commands run locally with no AI inference."}</p></div></div>
               <div className="ops-ai-chips">{SAMPLE_ACTIONS.map((item) => <button key={item.label} type="button" onClick={() => runDemo(item.input, item.action)}>{item.label}<ArrowUpRight size={13}/></button>)}</div>
               <div className="ops-messages" role="log" aria-live="polite">{messages.slice(-5).map((message) =>
                 <div className={`ops-msg ops-msg-${message.kind}`} key={message.id}><span>{message.kind === "agent" ? "LAB" : "YOU"}</span><p>{message.text}</p></div>
               )}<div ref={msgBottomRef}/></div>
               <form className="ops-agent-form" onSubmit={submitPrompt}><label htmlFor="ops-agent-input" className="sr-only">Ask the ops lab assistant</label><input id="ops-agent-input" value={prompt} onChange={(event) => setPrompt(event.target.value)} disabled={busy} maxLength={240} placeholder="Try: increase traffic, deploy, show status..." autoComplete="off"/><button type="submit" disabled={!prompt.trim() || busy} aria-label="Send command to ops lab"><Send size={16}/></button></form>
-              <div className="ops-ai-foot"><ShieldCheck size={13}/> {isAiConfigured ? `Cloudflare Free-only · ${AI_TURN_LIMIT - Math.min(remoteUsed, AI_TURN_LIMIT)} AI requests left this visit · demo fallback` : "Local simulation · $0 API usage · no credentials required"}</div>
+              <div className="ops-ai-foot"><ShieldCheck size={13}/> {aiOnline
+                ? `Cloudflare opt-in · ${AI_TURN_LIMIT - Math.min(remoteUsed, AI_TURN_LIMIT)} requests left this visit · owner kill switch enforced server-side`
+                : !isAiConfigured
+                  ? "Offline · $0 AI usage · Cloudflare not connected yet"
+                  : aiBlocked
+                    ? "Offline · Cloudflare unavailable or quota exhausted for this visit"
+                    : remoteUsed >= AI_TURN_LIMIT
+                      ? "Offline · visit limit reached · no more AI requests"
+                      : "Offline · $0 AI usage · switch to Cloudflare AI only when you choose"}</div>
             </article>
           </div>
 
