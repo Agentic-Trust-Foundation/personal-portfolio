@@ -7,11 +7,13 @@ describe("AI Ops workspace preview", () => {
   let host: HTMLDivElement;
   let root: Root;
   const onRestore = vi.fn();
+  const onHome = vi.fn();
   const onThemeToggle = vi.fn();
 
   beforeEach(async () => {
     (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
     onRestore.mockReset();
+    onHome.mockReset();
     onThemeToggle.mockReset();
     vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) =>
       window.setTimeout(() => cb(16), 0));
@@ -19,7 +21,7 @@ describe("AI Ops workspace preview", () => {
     host = document.createElement("div");
     document.body.appendChild(host);
     root = createRoot(host);
-    await act(async () => { root.render(<OpsDesktop visible theme="dark" onRestore={onRestore} onThemeToggle={onThemeToggle} />); });
+    await act(async () => { root.render(<OpsDesktop visible theme="dark" onRestore={onRestore} onHome={onHome} onThemeToggle={onThemeToggle} />); });
   });
   afterEach(async () => {
     await act(async () => { root.unmount(); });
@@ -90,7 +92,7 @@ describe("AI Ops workspace preview", () => {
   const configured = async () => {
     await act(async () => {
       root.render(<OpsDesktop visible theme="dark" onRestore={onRestore}
-        onThemeToggle={onThemeToggle} aiEndpoint="https://example.workers.dev/intent" />);
+        onHome={onHome} onThemeToggle={onThemeToggle} aiEndpoint="https://example.workers.dev/intent" />);
       await Promise.resolve();
     });
   };
@@ -180,6 +182,22 @@ describe("AI Ops workspace preview", () => {
     await click("Reset demo workspace");
     expect(host.textContent).toContain("v1.8.2");
     expect(host.textContent).not.toContain("BUILDING CANDIDATE");
+  });
+  it("offers visible Home and Restart actions while preserving the offline demo", async () => {
+    expect(host.querySelector('[aria-label="Back to CV home screen"]')).toBeTruthy();
+    expect(host.querySelector('[aria-label="Restart AI Ops playground"]')).toBeTruthy();
+    await click("Spike traffic");
+    await click("RUN DEMO");
+    expect(host.textContent).toContain("v1.8.3");
+    await click("Restart AI Ops playground");
+    expect(host.textContent).toContain("v1.8.2");
+    expect(host.textContent).toContain("246");
+    expect(host.textContent).toContain("OFFLINE DEMO");
+    expect(host.textContent).not.toContain("BUILDING CANDIDATE");
+    expect(host.textContent).toContain("Welcome to the lab.");
+    await click("Back to CV home screen");
+    expect(onHome).toHaveBeenCalledOnce();
+    expect(onRestore).not.toHaveBeenCalled();
   });
   it("offers a working dock to restore the CV and a theme toggle", async () => {
     await click("Restore CV terminal");

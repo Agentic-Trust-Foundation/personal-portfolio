@@ -238,6 +238,11 @@ export default function CvShell() {
     setWindowMode(restoredWindowMode.current);
   }
 
+  function returnHomeFromDesktop() {
+    restoreTerminal();
+    returnToWelcome();
+  }
+
   function toggleMaximizeTerminal() {
     setWindowMode((previous) => previous === "maximized" ? "normal" : "maximized");
   }
@@ -398,7 +403,7 @@ export default function CvShell() {
       id="main">
       <a className="cvcli-skip" href="#cvcli-main">Skip to CV terminal</a>
       <OpsDesktop visible={windowMode === "minimized"} theme={theme}
-        onRestore={restoreTerminal} onThemeToggle={toggleTheme} />
+        onRestore={restoreTerminal} onHome={returnHomeFromDesktop} onThemeToggle={toggleTheme} />
       <div className="cvcli-shell" aria-hidden={windowMode === "minimized"} inert={windowMode === "minimized"}>
         <header className="cvcli-header" aria-label="Terminal window">
           <div className="cvcli-top-left">

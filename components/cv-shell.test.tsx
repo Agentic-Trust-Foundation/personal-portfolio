@@ -187,6 +187,17 @@ describe("Terminal-first CV interaction", () => {
     expect(host.textContent).toContain("Available CV commands");
   });
 
+  it("returns from the desktop straight to the original CV Bash welcome screen", async () => {
+    await click("Yes, I have");
+    await click("Minimize terminal to AI Ops desktop");
+    expect(host.querySelector(".cvcli-desktop-open")).toBeTruthy();
+    await click("Back to CV home screen");
+    expect(host.querySelector(".cvcli-desktop-open")).toBeNull();
+    expect(host.querySelector(".cvcli-shell")?.getAttribute("aria-hidden")).toBe("false");
+    expect(host.querySelector(".cvcli-viewport")?.getAttribute("data-phase")).toBe("intro");
+    expect(host.textContent).toContain("Have you used Bash or a terminal before?");
+    expect(host.querySelector("#cvcli-command")).toBeNull();
+  });
   it("maximizes and restores without closing or reloading the CV shell", async () => {
     await click("Maximize terminal window");
     expect(host.querySelector(".cvcli-window-maximized")).toBeTruthy();

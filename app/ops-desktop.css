@@ -101,7 +101,10 @@
 .ops-menubar-right { font:10px/1.3 "JetBrains Mono",monospace; letter-spacing:.07em; color:var(--ops-muted); }
 .ops-live { display:inline-flex; align-items:center; gap:7px; white-space:nowrap; }
 .ops-live>span { width:6px; height:6px; border-radius:50%; background:var(--ops-positive); box-shadow:0 0 0 3px color-mix(in srgb,var(--ops-positive) 13%,transparent); }
-.ops-theme { background:var(--ops-panel); border:1px solid var(--ops-border); color:var(--ops-text); border-radius:5px; padding:8px 11px; font-size:10px!important; }
+.ops-toolbar-action, .ops-theme { display:inline-flex; align-items:center; justify-content:center; gap:6px; background:var(--ops-panel); border:1px solid var(--ops-border); color:var(--ops-text); border-radius:5px; padding:8px 10px; font:600 10px/1.3 "JetBrains Mono",monospace!important; white-space:nowrap; }
+.ops-toolbar-action svg { flex:none; color:var(--ops-accent); }
+.ops-toolbar-action:hover,.ops-theme:hover { background:var(--ops-panel-alt); border-color:var(--ops-accent); }
+.ops-theme { padding:8px 11px; }
 .ops-scroll { position:relative; z-index:1; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; scrollbar-width:thin; scrollbar-color:var(--ops-border) transparent; }
 .ops-main { width:min(1440px,100%); margin:auto; padding:clamp(22px,3.8vw,48px) clamp(16px,4vw,62px) 110px; }
 .ops-intro { display:flex; justify-content:space-between; align-items:end; gap:30px; padding:0 0 32px; }
@@ -237,6 +240,7 @@
 }
 @media (max-width: 760px) {
   .ops-menubar { padding:0 16px; height:51px; }
+  .ops-menubar-right { gap:7px; }
   .ops-menubar-right .ops-live { display:none; }
   .ops-main { padding:24px 14px 105px; }
   .ops-intro { padding-bottom:23px; }
@@ -253,8 +257,11 @@
   .ops-footer { font-size:8px; }
 }
 @media (max-width: 490px) {
-  .ops-brand-muted { display:none; }
-  .ops-brand-beta { font-size:8px; margin-left:0; }
+  .ops-brand-muted,.ops-brand-beta { display:none; }
+  .ops-brand,.ops-menubar-right { gap:5px; }
+  .ops-toolbar-action { padding:7px 6px; gap:4px; font-size:9px!important; }
+  .ops-toolbar-action svg { width:12px; height:12px; }
+  .ops-theme { padding:7px 7px; font-size:9px!important; }
   .ops-intro h1 { font-size:31px; letter-spacing:-.055em; }
   .ops-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .ops-metric:nth-child(2) { border:0; }
