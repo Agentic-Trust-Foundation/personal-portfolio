@@ -1,21 +1,37 @@
 /**
- * Entirely synthetic, deterministic operations lab. No infrastructure is touched.
- * The UI and local intent router work without network access or AI credentials.
+ * Synthetic, reproducible DevOps sandbox. Never touches a real cluster.
+ * Failure cases are scripted for plausibility and reliable regression tests.
  */
 export const PIPELINE_STAGES = ["Checks", "Build", "Security", "Rollout", "Health"] as const;
 export type LabIntent = "surge" | "normalize" | "deploy" | "inspect" | "reset";
 export type Traffic = "normal" | "surge";
+export type PipelineStatus = "idle" | "running" | "success" | "failed";
 export type LabEvent = { id: number; message: string; kind: "info" | "good" | "warning" };
 export type LabState = {
   traffic: Traffic;
-  pipelineStep: number; // -1 idle; 0..4 active; 5 finished
-  version: "v1.8.2" | "v1.8.3";
+  pipelineStep: number; // -1 idle; 0..4 stage; 5 successful completion
+  pipelineStatus: PipelineStatus;
+  failedStage: number | null;
+  attempt: number;
+  candidateVersion: string | null;
+  version: string; // last successfully deployed version, not failed candidates
+  durations: number[];
   tick: number;
   events: LabEvent[];
 };
+
+const BASE_VERSION = "v1.8.2";
+function stageDurations(attempt: number) {
+  return PIPELINE_STAGES.map((_, index) =>
+    740 + ((attempt * 7 + index * 3) % 5) * 350 +
+    (index === 1 && attempt % 4 === 0 ? 1550 : 0)
+  );
+}
 export function initialLab(): LabState {
   return {
-    traffic: "normal", pipelineStep: -1, version: "v1.8.2", tick: 0,
+    traffic: "normal", pipelineStep: -1, pipelineStatus: "idle",
+    failedStage: null, attempt: 0, candidateVersion: null,
+    version: BASE_VERSION, durations: [], tick: 0,
     events: [
       { id: 2, kind: "good", message: "All services healthy · 3/3 replicas ready" },
       { id: 1, kind: "info", message: "Interactive lab booted · simulated data only" },
@@ -24,40 +40,70 @@ export function initialLab(): LabState {
 }
 const addEvent = (state: LabState, message: string, kind: LabEvent["kind"]): LabState => ({
   ...state,
-  events: [{ id: state.tick + 10 + (state.events[0]?.id ?? 0), message, kind }, ...state.events].slice(0, 5),
+  events: [{ id: (state.events[0]?.id ?? 0) + 1, message, kind }, ...state.events].slice(0, 6),
 });
+export function failureStage(attempt: number): number | null {
+  // Familiar deterministic incidents: v1.8.5 build fails, v1.8.9 security fails.
+  // Later runs occasionally fail to mimic non-perfect delivery pipelines.
+  if (attempt === 3 || (attempt > 9 && attempt % 11 === 0)) return 1;
+  if (attempt === 7 || (attempt > 9 && attempt % 13 === 0)) return 2;
+  return null;
+}
 export function runLabAction(state: LabState, action: LabIntent): LabState {
   switch (action) {
     case "surge":
       return addEvent({ ...state, traffic: "surge", tick: state.tick + 1 }, "Traffic surge · autoscaler increased replicas to 5", "warning");
     case "normalize":
       return addEvent({ ...state, traffic: "normal", tick: state.tick + 1 }, "Traffic normalized · replicas scaled down to 3", "good");
-    case "deploy":
-      if (state.pipelineStep >= 0 && state.pipelineStep < PIPELINE_STAGES.length) return state;
-      return addEvent({ ...state, pipelineStep: 0, tick: state.tick + 1 }, "Release candidate v1.8.3 queued · Checks", "info");
+    case "deploy": {
+      if (state.pipelineStatus === "running") return state;
+      const attempt = state.attempt + 1;
+      const candidateVersion = "v1.8." + (2 + attempt);
+      return addEvent({
+        ...state, pipelineStatus: "running", pipelineStep: 0, failedStage: null,
+        attempt, candidateVersion, durations: stageDurations(attempt),
+        tick: state.tick + 1,
+      }, "Candidate " + candidateVersion + " queued · Checks", "info");
+    }
     case "inspect":
       return addEvent({ ...state, tick: state.tick + 1 }, "Inspect requested · metrics are synthetic", "info");
     case "reset":
-      return addEvent(initialLab(), "Demo reset · no real infrastructure affected", "good");
+      return addEvent(initialLab(), "Demo reset · version restored to " + BASE_VERSION, "good");
   }
 }
 export function advanceLab(state: LabState): LabState {
-  if (state.pipelineStep < 0 || state.pipelineStep >= PIPELINE_STAGES.length) return state;
-  const nextStep = state.pipelineStep + 1;
-  if (nextStep === PIPELINE_STAGES.length) {
-    return addEvent({ ...state, pipelineStep: nextStep, version: "v1.8.3", tick: state.tick + 1 }, "Release v1.8.3 healthy · rolling update complete", "good");
+  if (state.pipelineStatus !== "running" ||
+      state.pipelineStep < 0 || state.pipelineStep >= PIPELINE_STAGES.length) return state;
+  const stage = state.pipelineStep;
+  const failure = failureStage(state.attempt);
+  if (failure === stage) {
+    const reason = stage === 1
+      ? "Build failed · dependency mismatch / compilation error"
+      : "Security failed · vulnerable dependency detected";
+    return addEvent({
+      ...state, pipelineStatus: "failed", failedStage: stage, tick: state.tick + 1,
+    }, state.candidateVersion + " · " + reason + " · next candidate may fix it", "warning");
   }
-  return addEvent({ ...state, pipelineStep: nextStep, tick: state.tick + 1 }, "Pipeline · " + PIPELINE_STAGES[nextStep], "info");
+  const next = stage + 1;
+  if (next === PIPELINE_STAGES.length) {
+    return addEvent({
+      ...state, pipelineStatus: "success", pipelineStep: next,
+      version: state.candidateVersion ?? state.version, tick: state.tick + 1,
+    }, "Release " + state.candidateVersion + " healthy · rolling update complete", "good");
+  }
+  return addEvent({ ...state, pipelineStep: next, tick: state.tick + 1 },
+    state.candidateVersion + " · " + PIPELINE_STAGES[next] + " running", "info");
 }
 export function labMetrics(state: LabState) {
   const high = state.traffic === "surge";
-  const inRollout = state.pipelineStep === 3;
+  const inRollout = state.pipelineStatus === "running" && state.pipelineStep === 3;
   return {
     rps: high ? 972 : 246,
     p95: high ? 192 : 78,
     errors: high ? "0.18%" : "0.02%",
     cpu: high ? 76 : 39,
     ram: high ? 68 : 45,
+    fansPerNode: high ? [3, 2, 3] : [1, 1, 1],
     replicas: high ? 5 : 3,
     nodes: 3,
     ready: inRollout ? (high ? 4 : 2) : (high ? 5 : 3),
@@ -89,9 +135,9 @@ export function localLabReply(intent: LabIntent | null, state: LabState): string
   switch (intent) {
     case "surge": return "Simulated traffic increased. Watch Requests/sec, CPU and replica count move together.";
     case "normalize": return "Scenario back to normal. The lab scaled demo replicas down without touching a real cluster.";
-    case "deploy": return "Starting a simulated release. Follow Checks → Build → Security → Rollout → Health below.";
+    case "deploy": return "Starting simulated candidate " + (state.candidateVersion ?? "release") + ". Stages can pass, fail or run longer than expected. No real build occurs.";
     case "reset": return "Lab reset to its original healthy state.";
-    case "inspect": return `Demo cluster: ${metrics.nodes} nodes · ${metrics.ready}/${metrics.replicas} replicas · ${metrics.rps} RPS · p95 ${metrics.p95}ms. All figures are simulated.`;
-    default: return "I am in offline demo mode. Try “increase traffic”, “deploy”, “show status” or “reset”. Real Cloudflare AI is not connected.";
+    case "inspect": return `Demo cluster: ${metrics.nodes} nodes · ${metrics.ready}/${metrics.replicas} replicas · ${metrics.rps} RPS · p95 ${metrics.p95}ms. Current deployed: ${state.version}. All figures are simulated.`;
+    default: return "I am in offline demo mode. Try “increase traffic”, “deploy”, “show status” or “reset”.";
   }
 }
