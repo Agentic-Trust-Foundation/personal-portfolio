@@ -30,6 +30,14 @@ describe("Free-only Cloudflare Worker (all AI mocked)", () => {
     expect(response.status).toBe(503);
     expect(e.AI.run).not.toHaveBeenCalled();
   });
+  it("owner kill switch blocks AI immediately regardless of visitor online choice", async () => {
+    const e = env();
+    expect((await worker.fetch(request(), e)).status).toBe(200);
+    expect(e.AI.run).toHaveBeenCalledTimes(1);
+    e.AI_ENABLED = "false";
+    expect((await worker.fetch(request(), e)).status).toBe(503);
+    expect(e.AI.run).toHaveBeenCalledTimes(1);
+  });
   it("rejects unauthorized origins without touching the model", async () => {
     const e = env();
     const response = await worker.fetch(request("raise traffic", "https://attacker.example"), e);

@@ -40,3 +40,40 @@ IDs, tokens, Worker URLs or Cloudflare secrets.
 - Verify one successful allowed request returns only a safe action.
 - Verify 429 and depleted free Neurons show local-only fallback.
 - Observe real Cloudflare Free account usage (Neurons/day) before increasing limits.
+
+## On / Off runbook — two independent controls
+
+**Visitors:** `Workspace Agent → Assistant mode → Offline Demo / Cloudflare AI`.
+The site defaults to **Offline Demo on every new page load** even if a Worker
+URL is configured. Only **typed prompts after the visitor explicitly opts in**
+are sent to Cloudflare; all preset quick actions remain local. Turning
+Offline on prevents subsequent requests and aborts the current browser fetch
+best-effort. At most three AI calls are attempted per visit; errors and
+quota exhaustion automatically switch that visitor to Offline. The visitor
+switch is convenience and privacy, **not** a spending guarantee.
+
+**Owner / everyone at once (authoritative):**
+1. Open Cloudflare Dashboard → **Workers & Pages** → **hossein-ai-ops-free-lab**
+   → **Settings** → **Variables and Secrets**.
+2. Set `AI_ENABLED` to `false` and choose **Deploy**. All subsequent
+   `/intent` calls return 503 without any `env.AI.run`, even when a visitor
+   has switched to Cloudflare AI. Do not place an unsecured global switch on
+   the public site.
+3. If the Worker is not deployed, or the Vercel
+   `NEXT_PUBLIC_OPS_AI_ENDPOINT` environment variable is absent, the UI
+   stays in Offline Demo and offers no active online switch.
+4. To enable later: **first confirm the Cloudflare account is Workers Free**
+   (not Workers Paid and without prepaid AI Gateway credits), verify Free
+   eligibility of the pinned model, configure exact origin, and explicitly
+   set `PLAN_ASSERTED_FREE=true` and `AI_ENABLED=true` in the Worker
+   settings, then **Deploy**. A Worker URL must be configured separately for
+   the intended Vercel environment and rebuilt. The toggle is not a
+   substitute for checking account billing.
+
+Cloudflare official docs:
+- https://developers.cloudflare.com/workers/configuration/environment-variables/
+- https://developers.cloudflare.com/workers-ai/platform/pricing/
+
+A browser may already have an in-flight request when you turn the owner
+switch off; the server-side change prevents **new** inference requests after
+it takes effect, not work that has already started.

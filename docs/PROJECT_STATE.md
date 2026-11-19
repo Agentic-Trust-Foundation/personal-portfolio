@@ -137,3 +137,23 @@ Confirm Vercel team authorization, connect the Git repository when approved, dep
 - Vercel PR Preview: require READY and HTTP checks for `/`, `/resume/`, `/resume.pdf`.
 - Desktop visual/browser QA (especially minimize/restore on mobile) remains independent of unit tests and HTTP checks; obtain owner's feedback before any production release.
 - Cloudflare Workers AI: NOT DEPLOYED, NOT CONNECTED, NOT REQUESTED TO INFER. Verify Free plan manually and only enable after explicit separate approval.
+
+## 2026-11-19 — Owner-controlled AI on/off, safe-by-default
+
+- Explicit visitor mode selector in the Workspace Agent: **Offline Demo**
+  (default every page load) and **Cloudflare AI** (available only when a
+  verified Worker endpoint has been configured).
+- Offline prevents network/model requests. Quick-action chips always use
+  the local deterministic simulator. Online requires visitor opt-in per visit,
+  with three-call convenience limit and fail-closed offline fallback.
+- Turning Offline on also aborts any pending browser fetch best-effort.
+- Independent **global owner kill switch** already enforced in the Worker:
+  `AI_ENABLED=false` prevents all new inference requests, regardless of
+  browser state. Owner operates it using Cloudflare Dashboard → Workers &
+  Pages → Worker → Settings → Variables and Secrets → Deploy.
+- Cloudflare account/Workers Free plan still not connected or verified by
+  ChatGPT, and no AI inference has been enabled in Vercel. Worker code
+  remains disabled by default. The client cannot globally turn on or off
+  a Worker and exposes no admin secret.
+- Cost policy: Workers Free only, no paid billing. Browser-side rate limits
+  are not a strict global quota; provider Free-plan fail-stop is essential.
