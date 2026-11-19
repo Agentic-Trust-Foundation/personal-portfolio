@@ -147,3 +147,10 @@ Confirm Vercel team authorization, connect the Git repository when approved, dep
 - CI/CD runs use version candidates `v1.8.3`, `v1.8.4`, `v1.8.5`, etc. Candidate v1.8.5 fails Build and v1.8.9 fails Security. Failure keeps the previously deployed version; retries use the next candidate and may recover. Stage delays differ, with some slow builds, and failed stages turn red instead of green.
 - Reset always returns to v1.8.2, with cleared history and original synthetic lab health. These are illustrative scripted incidents, never actual builds or vulnerabilities.
 - PR #11 is developed on `feat/ops-ai-mode-toggle` and must pass CI/Preview before merging. Existing Production baseline `60e5113d60935544624a68e5cb23f717250b2980` remains available; older pre-desktop backup is `backup/pre-ai-playground-2026-11-19`.
+
+## Public CV contact address — 2026-11-20
+
+- Owner requested replacing the personal Gmail address on the public CV with `mohammaddokht@gitups.ir` to reduce crawler exposure of the personal mailbox.
+- Source of truth: `content/profile.json`; CLI `cv contact`, Next.js `/resume/` and legacy `/cv.html` use this new contact value. Regenerate the tracked two-page `public/resume.pdf` from this profile as part of the same change; do not ship an obsolete PDF publicly.
+- No mail routing, inbox verification, DNS update, or sending configuration is implied by the display change. The owner still needs to confirm that Cloudflare Email Routing forwards the new address correctly.
+- Old Git history, previously downloaded CVs, and external crawlers cannot be retroactively scrubbed by this change.

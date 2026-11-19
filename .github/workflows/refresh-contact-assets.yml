@@ -1,0 +1,63 @@
+name: One-time CV contact asset refresh
+
+# Runs only on this trusted short-lived branch when the canonical profile changes.
+# Delete this workflow before merging to main.
+on:
+  push:
+    branches:
+      - fix/contact-email-gitups-20261120
+    paths:
+      - content/profile.json
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    if: github.repository == 'Agentic-Trust-Foundation/personal-portfolio'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout this exact trusted branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/contact-email-gitups-20261120
+          persist-credentials: true
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install rendering packages
+        run: python -m pip install --disable-pip-version-check "playwright==1.56.0" "pymupdf==1.26.5"
+      - name: Install headless Chromium
+        run: python -m playwright install --with-deps chromium
+      - name: Regenerate HTML and two-page PDF from canonical profile
+        run: |
+          python scripts/render_resume.py --root . --html public/cv.html --pdf public/resume.pdf --previews .cv-contact-preview
+      - name: Verify the contact is searchable, old Gmail is absent, and PDF remains two pages
+        run: |
+          python - <<'PY'
+          import fitz
+          from pathlib import Path
+          new = "mohammaddokht@gitups.ir"
+          old = "mohammaddokht@gmail.com"
+          doc = fitz.open("public/resume.pdf")
+          assert len(doc) == 2, "PDF page count changed"
+          text = "\n".join(page.get_text() for page in doc)
+          assert new in text, "New email is not extractable"
+          assert old not in text and "@gmail.com" not in text, "Old address remains in PDF"
+          static_html = Path("public/cv.html").read_text()
+          assert new in static_html and old not in static_html, "Legacy HTML mismatch"
+          print("PUBLIC_CONTACT_REFRESH=PASS new_address_in_pdf=YES old_gmail_in_pdf=NO pages=2")
+          PY
+      - name: Commit generated assets to this branch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/cv.html public/resume.pdf
+          if git diff --cached --quiet; then
+            echo "Generated assets are already current"
+          else
+            git commit -m "docs(cv): refresh public PDF and HTML for domain email"
+            git push origin HEAD:fix/contact-email-gitups-20261120
+          fi
