@@ -17,6 +17,7 @@ export type LabState = {
   version: string; // last successfully deployed version, not failed candidates
   durations: number[];
   tick: number;
+  metricTick: number; // independent of traffic/deploy clicks, so numbers drift only with the telemetry clock
   events: LabEvent[];
 };
 
@@ -31,7 +32,7 @@ export function initialLab(): LabState {
   return {
     traffic: "normal", pipelineStep: -1, pipelineStatus: "idle",
     failedStage: null, attempt: 0, candidateVersion: null,
-    version: BASE_VERSION, durations: [], tick: 0,
+    version: BASE_VERSION, durations: [], tick: 0, metricTick: 0,
     events: [
       { id: 2, kind: "good", message: "All services healthy · 3/3 replicas ready" },
       { id: 1, kind: "info", message: "Interactive lab booted · simulated data only" },
@@ -94,15 +95,31 @@ export function advanceLab(state: LabState): LabState {
   return addEvent({ ...state, pipelineStep: next, tick: state.tick + 1 },
     state.candidateVersion + " · " + PIPELINE_STAGES[next] + " running", "info");
 }
+export function advanceTelemetry(state: LabState): LabState {
+  // One shared client-side clock drives the graph and the displayed metrics.
+  // It never sends requests, modifies a real cluster, or advances CI/CD stages.
+  return { ...state, tick: state.tick + 1, metricTick: state.metricTick + 1 };
+}
+
 export function labMetrics(state: LabState) {
   const high = state.traffic === "surge";
   const inRollout = state.pipelineStatus === "running" && state.pipelineStep === 3;
+  const t = state.metricTick;
+  // Deterministic, gentle fluctuations (rather than random telemetry).
+  // Tick zero preserves exact baseline values and the traffic scenario reset.
+  const drift = (primary: number, secondary: number, phase: number) =>
+    t === 0 ? 0 : Math.round(
+      Math.sin(t * 1.04 + phase) * primary +
+      Math.sin(t * .47 + phase / 2) * secondary
+    );
+  const errorsHundredths = (high ? 18 : 2) +
+    (t === 0 ? 0 : Math.round(Math.sin(t * .91 + .3) * (high ? 2 : 1)));
   return {
-    rps: high ? 972 : 246,
-    p95: high ? 192 : 78,
-    errors: high ? "0.18%" : "0.02%",
-    cpu: high ? 76 : 39,
-    ram: high ? 68 : 45,
+    rps: (high ? 972 : 246) + (high ? drift(18, 6, .1) : drift(8, 3, .1)),
+    p95: (high ? 192 : 78) + (high ? drift(5, 2, 1.4) : drift(3, 1, 1.4)),
+    errors: (errorsHundredths / 100).toFixed(2) + "%",
+    cpu: (high ? 76 : 39) + (high ? drift(3, 1, 2) : drift(2, 1, 2)),
+    ram: (high ? 68 : 45) + drift(2, 1, 2.5),
     // Single source of truth for both visible workload icons and cooling fans.
     podsPerNode: high ? [2, 2, 1] : [1, 1, 1],
     replicas: high ? 5 : 3,
@@ -113,13 +130,16 @@ export function labMetrics(state: LabState) {
 }
 export function chartPoints(state: LabState, count = 36): number[] {
   const high = state.traffic === "surge";
-  return Array.from({ length: count }, (_, i) => {
+  const points = Array.from({ length: count }, (_, i) => {
     const wave = Math.sin((i + state.tick) * .61) * 21 + Math.cos(i * .23) * 15;
     const load = high
       ? (i < count * .6 ? 250 + 720 * (i / (count * .6)) : 970)
       : 246;
     return Math.max(0, Math.round(load + wave + (i % 7 === 0 ? 24 : 0)));
   });
+  // The current endpoint of the chart must agree with the RPS card.
+  if (points.length) points[points.length - 1] = labMetrics(state).rps;
+  return points;
 }
 export function inferLabIntent(text: string): LabIntent | null {
   const s = text.trim().toLowerCase();

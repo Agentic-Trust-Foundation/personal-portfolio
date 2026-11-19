@@ -76,3 +76,9 @@ Leaving PR #10 unmerged keeps the current site unchanged; close PR if rejected.
 - AI Ops header now exposes **HOME** (returns to the original Bash-experience welcome screen) and **RESTART** (clears simulated lab and assistant transcript without a full browser reload). The existing Dock's Terminal action still preserves the previous CV session.
 - Restart deliberately does **not** reset the Cloudflare call counter or change the owner-controlled AI mode. Existing pipeline versioning and failure scenarios remain unchanged.
 - The separate, still-undeployed Cloudflare scaffold now pins `@cf/meta/llama-3.1-8b-instruct-fast` instead of the non-fast model deprecated in May 2026. Free-plan and live model eligibility remain mandatory pre-deploy checks. There is no user-facing AI switch and no change to live AI status.
+
+## Dynamic Observability telemetry — 2026-11-20
+
+- Preserve the initial Normal and Surge metrics, then update RPS, P95 latency, error percentage, and CPU/RAM with **bounded deterministic fluctuations** every 4.6 seconds while the workspace is visible. This shares the existing local chart timer; no network calls, real monitoring, or additional Cloudflare usage.
+- Keep the right edge of the chart synchronized to the current RPS metric; autoscaling and the deployment simulator remain independent. The numbers use tabular digits to prevent layout jitter.
+- Gently pulse only the status dot next to **SIMULATED · NO LIVE SYSTEMS**. Disable its animation with `prefers-reduced-motion`.

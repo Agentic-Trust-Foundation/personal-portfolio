@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { advanceLab, chartPoints, failureStage, inferLabIntent, initialLab, labMetrics, localLabReply, PIPELINE_STAGES, runLabAction } from "./ops-simulator";
+import { advanceLab, advanceTelemetry, chartPoints, failureStage, inferLabIntent, initialLab, labMetrics, localLabReply, PIPELINE_STAGES, runLabAction } from "./ops-simulator";
 
 function finish(state: ReturnType<typeof initialLab>) {
   let s = state;
@@ -12,6 +12,37 @@ describe("Synthetic AI Ops lab (no infrastructure or network)", () => {
     expect(labMetrics(lab)).toMatchObject({ nodes: 3, replicas: 3, ready: 3, version: "v1.8.2", podsPerNode: [1,1,1] });
     expect(chartPoints(lab)).toEqual(chartPoints(initialLab()));
     expect(chartPoints(lab)).toHaveLength(36);
+  });
+  it("updates synthetic metrics gently on the telemetry clock, preserving deployment state", () => {
+    const baseline = initialLab();
+    const first = advanceTelemetry(baseline);
+    const second = advanceTelemetry(first);
+    const a = labMetrics(baseline), b = labMetrics(first), c = labMetrics(second);
+    expect(a).toMatchObject({ rps: 246, p95: 78, errors: "0.02%", cpu: 39, ram: 45 });
+    expect(b.rps).not.toBe(a.rps);
+    expect(b.p95).not.toBe(a.p95);
+    expect(b.rps).toBeGreaterThan(230);
+    expect(b.rps).toBeLessThan(263);
+    expect(c.rps).not.toBe(a.rps);
+    expect(first.pipelineStatus).toBe("idle");
+    expect(first.attempt).toBe(0);
+    expect(first.version).toBe(baseline.version);
+    expect(chartPoints(first).at(-1)).toBe(b.rps);
+    expect(labMetrics({ ...first }).rps).toBe(b.rps);
+    expect(labMetrics(runLabAction(first, "reset")).rps).toBe(246);
+
+    const surged = runLabAction(baseline, "surge");
+    expect(labMetrics(surged).rps).toBe(972);
+    const surgeTick = advanceTelemetry(surged);
+    const changed = labMetrics(surgeTick);
+    expect(changed.rps).toBeGreaterThan(940);
+    expect(changed.rps).toBeLessThan(1005);
+    expect(changed.cpu).toBeGreaterThanOrEqual(72);
+    expect(changed.cpu).toBeLessThanOrEqual(80);
+    expect(changed.errors).toMatch(/^0\.\d{2}%$/);
+    expect(chartPoints(surgeTick).at(-1)).toBe(changed.rps);
+    expect(changed.podsPerNode).toEqual([2, 2, 1]);
+    expect(changed.replicas).toBe(5);
   });
   it("scales workload icons per worker and keeps their total equal to replicas", () => {
     const high = runLabAction(initialLab(), "surge");
