@@ -103,7 +103,8 @@ export function labMetrics(state: LabState) {
     errors: high ? "0.18%" : "0.02%",
     cpu: high ? 76 : 39,
     ram: high ? 68 : 45,
-    fansPerNode: high ? [3, 2, 3] : [1, 1, 1],
+    // Single source of truth for both visible workload icons and cooling fans.
+    podsPerNode: high ? [2, 2, 1] : [1, 1, 1],
     replicas: high ? 5 : 3,
     nodes: 3,
     ready: inRollout ? (high ? 4 : 2) : (high ? 5 : 3),

@@ -67,6 +67,6 @@ Leaving PR #10 unmerged keeps the current site unchanged; close PR if rejected.
 - Visitors **must not** see an Online/Offline switch. They get a read-only status label.
 - Global AI mode is authenticated Cloudflare owner configuration, not a public Vercel route. Worker `GET /status` reports the effective mode without a model call; `POST /intent` enforces `AI_ENABLED` and `PLAN_ASSERTED_FREE`.
 - Verify switching the owner flag off leads to a read-only `OFFLINE DEMO` label and local-only commands. No Worker or paid plan is deployed automatically by this PR.
-- Kubernetes nodes: CPU fan indicators spin faster and increase in count during a traffic surge. `prefers-reduced-motion` removes rotation.
+- Kubernetes nodes: one cooling-fan indicator per displayed CPU-shaped workload/pod icon. A traffic surge increases visible pod icons (worker-01: 2, worker-02: 2, worker-03: 1) and speeds up fan rotation; it never creates extra fans unrelated to visible icons. `prefers-reduced-motion` removes rotation.
 - CI/CD: increment candidate version on every run, retain last successfully deployed version when Build or Security fails, and allow a retry with the next candidate. Failure cases `v1.8.5` Build and `v1.8.9` Security; varying stage durations imitate occasional slow builds. Reset restores v1.8.2.
 - The user-approved initial AI Ops desktop is already in Production via PR #10; this additional PR #11 is separate and must preserve the existing published site until verified.

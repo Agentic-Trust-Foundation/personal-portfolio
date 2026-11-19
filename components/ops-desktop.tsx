@@ -263,12 +263,12 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle, a
               </div>
               <div className="ops-node-grid">
                 {NODE_NAMES.map((name, index) => {
-                  const pods = metrics.replicas === 5 ? [2, 2, 1][index] : 1;
+                  const pods = metrics.podsPerNode[index];
                   return (
                     <div key={name} className="ops-node">
                       <div className="ops-node-head"><Server size={13}/><span>{name}</span><i/></div>
-                      <div className={`ops-cpu-fans ${lab.traffic === "surge" ? "ops-cpu-fans-busy" : ""}`} aria-label={`${metrics.fansPerNode[index]} animated CPU fan indicators on ${name}`}>
-                        {Array.from({ length: metrics.fansPerNode[index] }, (_, fan) => (
+                      <div className={`ops-cpu-fans ${lab.traffic === "surge" ? "ops-cpu-fans-busy" : ""}`} aria-label={`${pods} animated CPU fan indicator${pods === 1 ? "" : "s"} on ${name}`}>
+                        {Array.from({ length: pods }, (_, fan) => (
                           <span key={fan} className="ops-fan-shell" title="Synthetic CPU load · rotating cooling fan">
                             <span className="ops-fan-rotor" aria-hidden="true"><i/><i/><i/><i/></span>
                           </span>

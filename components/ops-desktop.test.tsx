@@ -155,13 +155,23 @@ describe("AI Ops workspace preview", () => {
     expect(fetchSpy.mock.calls.filter(([, opts]) => (opts as RequestInit)?.method === "POST")).toHaveLength(1);
     expect(host.textContent).toContain("972");
   });
-  it("shows animated CPU fan indicators that scale with synthetic workload", async () => {
-    expect(host.querySelectorAll(".ops-fan-shell")).toHaveLength(3);
+  it("keeps each worker's fan count equal to its visible CPU-shaped workload icons", async () => {
+    const counts = () => [...host.querySelectorAll(".ops-node")].map((node) => ({
+      fans: node.querySelectorAll(".ops-fan-shell").length,
+      icons: node.querySelectorAll(".ops-pod").length,
+    }));
+    expect(counts()).toEqual([
+      { fans: 1, icons: 1 }, { fans: 1, icons: 1 }, { fans: 1, icons: 1 },
+    ]);
     await click("Spike traffic");
-    expect(host.querySelectorAll(".ops-fan-shell")).toHaveLength(8);
+    expect(counts()).toEqual([
+      { fans: 2, icons: 2 }, { fans: 2, icons: 2 }, { fans: 1, icons: 1 },
+    ]);
     expect(host.querySelectorAll(".ops-cpu-fans-busy")).toHaveLength(3);
     await click("Normal");
-    expect(host.querySelectorAll(".ops-fan-shell")).toHaveLength(3);
+    expect(counts()).toEqual([
+      { fans: 1, icons: 1 }, { fans: 1, icons: 1 }, { fans: 1, icons: 1 },
+    ]);
   });
   it("shows a new CI/CD candidate and resets the deployed version", async () => {
     await click("RUN DEMO");
