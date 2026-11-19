@@ -108,6 +108,56 @@ describe("Terminal-first CV interaction", () => {
     expect(host.querySelectorAll(".cvcli-action")).toHaveLength(0);
   });
 
+  it("returns from an active expert session to the opening Bash question without reloading", async () => {
+    await click("Switch to light mode");
+    await click("Yes, I have");
+    const input = host.querySelector("#cvcli-command") as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+    if (!setter) throw new Error("Missing native value setter");
+    await act(async () => {
+      setter.call(input, "cv work");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => {
+      host.querySelector<HTMLFormElement>(".cvcli-form")?.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true })
+      );
+    });
+    expect(host.querySelectorAll(".cvcli-turn")).toHaveLength(1);
+    await click("Back to CV welcome screen and Bash question");
+    expect(host.textContent).toContain("Have you used Bash or a terminal before?");
+    expect(host.querySelector("#cvcli-command")).toBeNull();
+    expect(host.querySelector(".cvcli-history")).toBeNull();
+    expect(host.querySelector(".cvcli-viewport")?.getAttribute("data-phase")).toBe("intro");
+    expect(host.querySelector(".cvcli-viewport")?.getAttribute("data-theme")).toBe("light");
+    expect(window.localStorage.getItem("hossein-cv-terminal-theme")).toBe("light");
+    await click("No, show me");
+    expect(host.textContent).toContain("Guided mode loaded.");
+    expect(host.querySelectorAll(".cvcli-turn")).toHaveLength(0);
+  });
+
+  it("returns from full-screen Snake to the opening question via the terminal title", async () => {
+    await click("Yes, I have");
+    const input = host.querySelector("#cvcli-command") as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+    if (!setter) throw new Error("Missing native value setter");
+    await act(async () => {
+      setter.call(input, "cv play snake");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => {
+      host.querySelector<HTMLFormElement>(".cvcli-form")?.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true })
+      );
+    });
+    expect(host.querySelector(".cvcli-game-mode")).toBeTruthy();
+    await click("Back to CV welcome screen and Bash question");
+    expect(host.querySelector(".cvcli-game-mode")).toBeNull();
+    expect(host.querySelector(".cvcli-game-slot")).toBeNull();
+    expect(host.querySelector(".cvcli-startup")).toBeTruthy();
+    expect(host.textContent).toContain("Have you used Bash or a terminal before?");
+  });
+
   it("starts in the dark terminal and asks about Bash", () => {
     expect(host.querySelector(".cvcli-shell")).toBeTruthy();
     expect(host.querySelector(".cvcli-viewport")?.getAttribute("data-theme")).toBe("dark");

@@ -110,3 +110,11 @@ Confirm Vercel team authorization, connect the Git repository when approved, dep
 - Transparent pet overlay uses `pointer-events:none`; visible dismiss button or `cv play oneko off` restores the original cursor. Text inputs retain an I-beam cursor.
 - Motion is disabled for touch-only and prefers-reduced-motion environments and while the full-screen Snake game is open.
 - Add release SHA, GitHub Actions evidence, Vercel Preview and HTTP checks only after those steps actually pass.
+
+## Terminal title back navigation — 2026-11-19
+
+- The header path `hossein@cv: ~` (or `~/snake`) is now a keyboard-accessible back button with a subtle left arrow, hover/focus styling, and a descriptive label.
+- Clicking returns to the original Bash-experience question within the current page: resets CLI mode, command transcript/history, prompt, guided panel and game mode; scrolls the terminal to the top and focuses the question. No forced browser reload.
+- Current Dark/Light preference and site-wide optional Oneko companion stay active, while CV HTML/PDF and command syntax remain unchanged.
+- Re-entering the intro uses a brief reveal animation that respects `prefers-reduced-motion`.
+- New regression tests cover return from an expert session and from the immersive Snake game. Production deployment must be confirmed against CI and Vercel before marking this release complete.

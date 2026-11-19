@@ -407,3 +407,57 @@
   .cvcli-game-mode .cv-snake-touch { margin-top: 11px; padding-bottom: 6px; }
   .cvcli-status-help { padding: 4px 6px; font-size: 9px; }
 }
+
+/* Clickable terminal path: reset to the initial Bash question, without reloading. */
+.cvcli-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+  margin: -4px 0;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--cli-soft);
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease;
+}
+.cvcli-home-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cvcli-home-arrow {
+  flex: none;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--cli-mid);
+  transition: transform 220ms ease, color 180ms ease;
+}
+.cvcli-home .cvcli-tab-symbol { flex: none; }
+.cvcli-home:hover, .cvcli-home:focus-visible {
+  color: var(--cli-pale);
+  background: var(--cli-hover);
+  border-color: var(--cli-line);
+}
+.cvcli-home:hover .cvcli-home-arrow, .cvcli-home:focus-visible .cvcli-home-arrow {
+  transform: translateX(-3px);
+  color: var(--cli-pale);
+}
+.cvcli-onboarding h2:focus { outline: none; }
+@keyframes cvcli-home-reveal {
+  from { opacity: 0; transform: translateY(13px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.cvcli-returning-home .cvcli-startup-content {
+  animation: cvcli-home-reveal 620ms cubic-bezier(.22, 1, .36, 1) both;
+}
+@media (max-width: 510px) {
+  .cvcli-home { padding: 7px 4px; gap: 3px; }
+  .cvcli-home-arrow { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cvcli-returning-home .cvcli-startup-content { animation: none; }
+  .cvcli-home, .cvcli-home-arrow { transition: none; }
+}
