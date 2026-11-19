@@ -118,3 +118,22 @@ Confirm Vercel team authorization, connect the Git repository when approved, dep
 - Current Dark/Light preference and site-wide optional Oneko companion stay active, while CV HTML/PDF and command syntax remain unchanged.
 - Re-entering the intro uses a brief reveal animation that respects `prefers-reduced-motion`.
 - New regression tests cover return from an expert session and from the immersive Snake game. Production deployment must be confirmed against CI and Vercel before marking this release complete.
+
+## AI Ops Playground preview — 2026-11-19
+
+**Isolation / rollback gate**
+- Production and preserved backup remain at `6f2ea945ad1f2778ed26fd231c64ba73a863a683` (release after PR #9), with confirmed Vercel READY deployment `dpl_ASwQwaEGyFkTE5yKbzHoiAY9avqq`.
+- Feature work lives only on `feat/ai-ops-desktop-preview` (PR #10); do not merge to `main` without owner visual acceptance.
+- The original CV Terminal, guided mode, typed commands, color theme, Oneko, Snake and two-page static PDF are still present and test-covered.
+
+**Implemented in preview**
+- Full-screen compact AI Ops desktop, revealed by terminal yellow Minimize control; green control toggles maximize, red is non-destructive; Restore via desktop Dock.
+- Synthetic observability dashboard, 3-node Kubernetes topology with autoscaling, and deterministic 5-stage CI/CD rolling update.
+- An agent-like panel accepts limited English and Persian lab instructions. By default, all actions are computed locally and cost $0. Data are clearly labeled DEMO/SIMULATED.
+- Optional Cloudflare Workers AI code prepared in an isolated, disabled-by-default directory. It may be enabled only after verified Workers Free account and exact origin setup. No tokens, keys, Cloudflare account actions or paid service are used.
+
+**Evidence and unresolved gates**
+- CI: Vitest, ESLint, Next.js static export and PDF integrity required on PR head; record link and count once verified.
+- Vercel PR Preview: require READY and HTTP checks for `/`, `/resume/`, `/resume.pdf`.
+- Desktop visual/browser QA (especially minimize/restore on mobile) remains independent of unit tests and HTTP checks; obtain owner's feedback before any production release.
+- Cloudflare Workers AI: NOT DEPLOYED, NOT CONNECTED, NOT REQUESTED TO INFER. Verify Free plan manually and only enable after explicit separate approval.
