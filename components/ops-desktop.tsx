@@ -8,7 +8,7 @@ import {
   Terminal, Workflow, Zap,
 } from "lucide-react";
 import {
-  advanceLab, chartPoints, inferLabIntent, initialLab, labMetrics, localLabReply,
+  advanceLab, advanceTelemetry, chartPoints, inferLabIntent, initialLab, labMetrics, localLabReply,
   PIPELINE_STAGES, runLabAction, type LabIntent,
 } from "@/lib/ops-simulator";
 
@@ -119,7 +119,7 @@ export default function OpsDesktop({ visible, theme, onRestore, onHome, onThemeT
 
   useEffect(() => {
     if (!visible) return;
-    const timer = window.setInterval(() => setLab((previous) => ({ ...previous, tick: previous.tick + 1 })), 4600);
+    const timer = window.setInterval(() => setLab(advanceTelemetry), 4600);
     return () => window.clearInterval(timer);
   }, [visible]);
 

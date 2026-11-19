@@ -45,6 +45,30 @@ describe("AI Ops workspace preview", () => {
     expect(host.textContent).toContain("SIMULATED · NO LIVE SYSTEMS");
     expect(host.textContent).toContain("OFFLINE DEMO");
   });
+  it("updates the metric cards on the same timer as the synthetic graph, without fetching", async () => {
+    const metricTexts = () => [...host.querySelectorAll(".ops-metric strong")].map((item) => item.textContent);
+    // Re-arm the visible-only interval after installing fake timers.
+    await act(async () => {
+      root.render(<OpsDesktop visible={false} theme="dark" onRestore={onRestore} onHome={onHome} onThemeToggle={onThemeToggle} />);
+    });
+    vi.useFakeTimers();
+    try {
+      await act(async () => {
+        root.render(<OpsDesktop visible theme="dark" onRestore={onRestore} onHome={onHome} onThemeToggle={onThemeToggle} />);
+      });
+      expect(metricTexts()[0]).toBe("246");
+      const before = metricTexts();
+      await act(async () => { vi.advanceTimersByTime(4600); });
+      const after = metricTexts();
+      expect(after[0]).not.toBe(before[0]);
+      expect(after[1]).not.toBe(before[1]);
+      expect(after[2]).toBe("0.03%");
+      expect(after[3]).not.toBe(before[3]);
+      expect(host.textContent).toContain("SIMULATED · NO LIVE SYSTEMS");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
   it("changes multiple panels together in a client-only traffic surge", async () => {
     await click("Spike traffic");
     expect(host.textContent).toContain("972");
