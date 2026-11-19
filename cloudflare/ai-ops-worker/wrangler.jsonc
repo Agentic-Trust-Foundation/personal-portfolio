@@ -1,0 +1,16 @@
+{
+  "name": "hossein-ai-ops-free-lab",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-19",
+  "workers_dev": true,
+  "ai": { "binding": "AI" },
+  "vars": {
+    "AI_ENABLED": "false",
+    "PLAN_ASSERTED_FREE": "false",
+    "ALLOWED_ORIGIN": ""
+  },
+  "ratelimits": [
+    { "name": "GLOBAL_RATE", "namespace_id": "3031", "simple": { "limit": 12, "period": 60 } },
+    { "name": "CLIENT_RATE", "namespace_id": "3032", "simple": { "limit": 3, "period": 60 } }
+  ]
+}

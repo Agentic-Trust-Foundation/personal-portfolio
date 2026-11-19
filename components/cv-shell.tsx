@@ -11,6 +11,8 @@ import {
 } from "react";
 import { profile } from "@/content/profile";
 import CvSnake from "./cv-snake";
+import OpsDesktop from "./ops-desktop";
+import { Maximize2, Minimize2, Minus } from "lucide-react";
 import { setOnekoEnabled } from "./oneko-companion";
 import {
   ALLOWED_COMMANDS,
@@ -21,6 +23,7 @@ import {
 
 type ShellMode = "guided" | "expert";
 type ColorTheme = "dark" | "light";
+type WindowMode = "normal" | "maximized" | "minimized";
 type TranscriptLine = {
   id: number;
   command: string;
@@ -52,6 +55,8 @@ export default function CvShell() {
   const [input, setInput] = useState("");
   const [lines, setLines] = useState<TranscriptLine[]>([]);
   const [snakeActive, setSnakeActive] = useState(false);
+  const [windowMode, setWindowMode] = useState<WindowMode>("normal");
+  const restoredWindowMode = useRef<"normal" | "maximized">("normal");
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [showMore, setShowMore] = useState(false);
@@ -222,6 +227,21 @@ export default function CvShell() {
     return () => document.documentElement.classList.remove("cv-snake-mode");
   }, [snakeActive]);
 
+  function minimizeTerminal() {
+    if (windowMode !== "minimized") {
+      restoredWindowMode.current = windowMode;
+      setWindowMode("minimized");
+    }
+  }
+
+  function restoreTerminal() {
+    setWindowMode(restoredWindowMode.current);
+  }
+
+  function toggleMaximizeTerminal() {
+    setWindowMode((previous) => previous === "maximized" ? "normal" : "maximized");
+  }
+
   function returnToWelcome() {
     // Start a fresh CV session without a full page reload. Keep the chosen
     // color theme and any optional Oneko companion running in the root layout.
@@ -373,14 +393,27 @@ export default function CvShell() {
   );
 
   return (
-    <main className={`cvcli-viewport${sessionActive ? " cvcli-engaged" : ""}${snakeActive ? " cvcli-game-mode" : ""}${returningHome ? " cvcli-returning-home" : ""}`}
+    <main className={`cvcli-viewport${sessionActive ? " cvcli-engaged" : ""}${snakeActive ? " cvcli-game-mode" : ""}${returningHome ? " cvcli-returning-home" : ""}${windowMode === "minimized" ? " cvcli-desktop-open" : ""}${windowMode === "maximized" ? " cvcli-window-maximized" : ""}`}
       data-theme={theme} data-phase={sessionActive ? (startupClosing ? "clearing" : "active") : "intro"}
       id="main">
       <a className="cvcli-skip" href="#cvcli-main">Skip to CV terminal</a>
-      <div className="cvcli-shell">
+      <OpsDesktop visible={windowMode === "minimized"} theme={theme}
+        onRestore={restoreTerminal} onThemeToggle={toggleTheme} />
+      <div className="cvcli-shell" aria-hidden={windowMode === "minimized"} inert={windowMode === "minimized"}>
         <header className="cvcli-header" aria-label="Terminal window">
           <div className="cvcli-top-left">
-            <div className="cvcli-window-dots" aria-hidden="true"><i /><i /><i /></div>
+            <div className="cvcli-window-dots" role="group" aria-label="Terminal window controls">
+              <span className="cvcli-light cvcli-light-red" aria-hidden="true" title="No close — keep your session"/>
+              <button type="button" className="cvcli-light cvcli-light-yellow"
+                onClick={minimizeTerminal} aria-label="Minimize terminal to AI Ops desktop"
+                title="Minimize · Explore the workspace"><Minus size={10}/></button>
+              <button type="button" className="cvcli-light cvcli-light-green"
+                onClick={toggleMaximizeTerminal}
+                aria-label={windowMode === "maximized" ? "Restore terminal window size" : "Maximize terminal window"}
+                title={windowMode === "maximized" ? "Restore window" : "Maximize window"}>
+                {windowMode === "maximized" ? <Minimize2 size={10}/> : <Maximize2 size={10}/>}
+              </button>
+            </div>
             <span className="cvcli-header-divider" aria-hidden="true" />
             <button type="button" className="cvcli-tab cvcli-home" onClick={returnToWelcome}
               aria-label="Back to CV welcome screen and Bash question"
@@ -458,7 +491,7 @@ export default function CvShell() {
           {mode !== null && (
             snakeActive ? (
               <div ref={snakeRef} className="cvcli-game-slot">
-                <CvSnake onExit={exitSnake} />
+                <CvSnake onExit={exitSnake} suspended={windowMode === "minimized"} />
               </div>
             ) : (
             <>

@@ -9,7 +9,7 @@ A personal, content-first portfolio with a **CV-only command line** and a readab
 - **Terminal mode:** type `cv help`, use Tab to complete commands, ↑/↓ for history.
 - Supports `cv work -v`, `cv skills -v`, individual projects, certifications, and contact information.
 - Offers an accessible resume at `/resume/` and an actual static PDF at `/resume.pdf`.
-- No backend, database, real shell, analytics, cookies, API keys, or runtime network access.
+- The approved production CV has no backend, database, real shell, analytics, or API keys. The separate AI Ops Preview is entirely synthetic and offline by default; an opt-in Cloudflare Worker is scaffolded but not deployed.
 
 ## Commands
 
@@ -90,3 +90,17 @@ Original template (c) 2026 Umer Farooq, MIT. License is preserved in [LICENSE](L
 The CV terminal offers two optional Bonus commands: `cv play snake` (in-terminal game mode) and `cv play oneko` (pixel cat follows the mouse across this portfolio). `cv play oneko off` or the tiny Oneko dismissal button disables it. The cat runs only in the browser, remembers activation for the current tab, uses no backend/network access, and respects reduced-motion settings. It cannot follow the cursor on unrelated websites; that would require a browser extension.
 
 Cat spritesheet and sprite-frame references: **adryd325/oneko.js** (copyright © 2022 adryd, MIT). The sprite is stored locally at `public/oneko.gif` and the license notice is preserved at `licenses/oneko-js-MIT.txt`. The cursor mouse SVG is independently authored for this portfolio.
+
+## AI Ops Playground (isolated Preview, **not released to Production**)
+
+The yellow terminal window control minimizes into a developer desktop, with a restore button in a dock. The green control maximizes/restores the terminal. The red dot does not close the CV. The same command history, typing, Snake and theme are preserved when minimizing and restoring (Snake ticking is suspended while minimized).
+
+The playground is a **browser-only simulator**, with visibly labeled synthetic RPS, p95 latency, error rate, CPU, Kubernetes nodes and pods, autoscaling, and a five-stage CI/CD rolling update. It includes a **local demo intent router** with a chat-like interface for common commands. It does **not** query real Kubernetes clusters, run builds, change systems, call a model, or claim real uptime.
+
+- Source: `components/ops-desktop.tsx`, `lib/ops-simulator.ts`, `app/ops-desktop.css`.
+- Tests cover simulations, return to the original CV, prompt controls, no-network fallback and theme.
+- Current production rollback anchor: Git SHA `6f2ea945ad1f2778ed26fd231c64ba73a863a683`, branch `backup/pre-ai-playground-2026-11-19`, Vercel deployment `dpl_ASwQwaEGyFkTE5yKbzHoiAY9avqq`.
+- **Cloudflare Workers AI:** a separate, disabled-by-default Free-only intent router lives in `cloudflare/ai-ops-worker/`. Account registration, Free-plan verification, origin lock, Worker deployment, and enabling the client endpoint all require separate owner approval. **No Cloudflare Worker has been deployed and no billing enabled by this PR.**
+- No merge to `main` until the owner evaluates the Preview and explicitly likes it. If not, close the PR and simply continue using the preserved production version.
+
+For hard safety requirements, read [AI Ops Worker setup](cloudflare/ai-ops-worker/README.md) and [Preview acceptance checklist](docs/AI_OPS_PREVIEW.md).
