@@ -39,7 +39,7 @@ describe("Synthetic AI Ops lab (no infrastructure or network)", () => {
     expect(changed.rps).toBeLessThan(1005);
     expect(changed.cpu).toBeGreaterThanOrEqual(72);
     expect(changed.cpu).toBeLessThanOrEqual(80);
-    expect(changed.errors).toMatch(/^0\\.\d{2}%$/);
+    expect(changed.errors).toMatch(/^0\.\d{2}%$/);
     expect(chartPoints(surgeTick).at(-1)).toBe(changed.rps);
     expect(changed.podsPerNode).toEqual([2, 2, 1]);
     expect(changed.replicas).toBe(5);
