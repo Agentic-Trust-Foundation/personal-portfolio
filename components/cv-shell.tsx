@@ -56,6 +56,7 @@ export default function CvShell() {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [showMore, setShowMore] = useState(false);
   const [sessionActive, setSessionActive] = useState(false);
+  const [returningHome, setReturningHome] = useState(false);
   const [startupClosing, setStartupClosing] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [hint, setHint] = useState("");
@@ -63,8 +64,10 @@ export default function CvShell() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const guidedRef = useRef<HTMLDivElement>(null);
   const snakeRef = useRef<HTMLDivElement>(null);
+  const welcomeHeadingRef = useRef<HTMLHeadingElement>(null);
   const lineId = useRef(0);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const homeTimer = useRef<number | null>(null);
   const scrollAnimationFrame = useRef<number | null>(null);
 
   // Keep the default dark appearance close to the supplied P.CV screenshot.
@@ -85,6 +88,7 @@ export default function CvShell() {
   useEffect(() => {
     return () => {
       if (closeTimer.current) clearTimeout(closeTimer.current);
+      if (homeTimer.current) clearTimeout(homeTimer.current);
       if (scrollAnimationFrame.current !== null) {
         window.cancelAnimationFrame(scrollAnimationFrame.current);
       }
@@ -218,7 +222,43 @@ export default function CvShell() {
     return () => document.documentElement.classList.remove("cv-snake-mode");
   }, [snakeActive]);
 
+  function returnToWelcome() {
+    // Start a fresh CV session without a full page reload. Keep the chosen
+    // color theme and any optional Oneko companion running in the root layout.
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = null;
+    if (homeTimer.current) clearTimeout(homeTimer.current);
+    if (scrollAnimationFrame.current !== null) {
+      window.cancelAnimationFrame(scrollAnimationFrame.current);
+      scrollAnimationFrame.current = null;
+    }
+    setMode(null);
+    setSnakeActive(false);
+    setLines([]);
+    setHistory([]);
+    setHistoryIndex(-1);
+    lineId.current = 0;
+    setInput("");
+    setHint("");
+    setShowMore(false);
+    setSessionActive(false);
+    setStartupClosing(false);
+    setShowCommandPalette(false);
+    setReturningHome(true);
+    homeTimer.current = window.setTimeout(() => {
+      setReturningHome(false);
+      homeTimer.current = null;
+    }, 650);
+    window.requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
+      welcomeHeadingRef.current?.focus({ preventScroll: true });
+    });
+  }
+
   function chooseMode(nextMode: ShellMode) {
+    if (homeTimer.current) clearTimeout(homeTimer.current);
+    homeTimer.current = null;
+    setReturningHome(false);
     if (closeTimer.current) clearTimeout(closeTimer.current);
     closeTimer.current = null;
     setMode(nextMode);
@@ -333,7 +373,7 @@ export default function CvShell() {
   );
 
   return (
-    <main className={`cvcli-viewport${sessionActive ? " cvcli-engaged" : ""}${snakeActive ? " cvcli-game-mode" : ""}`}
+    <main className={`cvcli-viewport${sessionActive ? " cvcli-engaged" : ""}${snakeActive ? " cvcli-game-mode" : ""}${returningHome ? " cvcli-returning-home" : ""}`}
       data-theme={theme} data-phase={sessionActive ? (startupClosing ? "clearing" : "active") : "intro"}
       id="main">
       <a className="cvcli-skip" href="#cvcli-main">Skip to CV terminal</a>
@@ -342,7 +382,13 @@ export default function CvShell() {
           <div className="cvcli-top-left">
             <div className="cvcli-window-dots" aria-hidden="true"><i /><i /><i /></div>
             <span className="cvcli-header-divider" aria-hidden="true" />
-            <span className="cvcli-tab"><span className="cvcli-tab-symbol">▸</span> {snakeActive ? "hossein@cv: ~/snake" : "hossein@cv: ~"}</span>
+            <button type="button" className="cvcli-tab cvcli-home" onClick={returnToWelcome}
+              aria-label="Back to CV welcome screen and Bash question"
+              title="Back to start · restart CV session">
+              <span className="cvcli-home-arrow" aria-hidden="true">←</span>
+              <span className="cvcli-tab-symbol" aria-hidden="true">▸</span>
+              <span className="cvcli-home-label">{snakeActive ? "hossein@cv: ~/snake" : "hossein@cv: ~"}</span>
+            </button>
           </div>
           <nav className="cvcli-utilities" aria-label="CV shortcuts and color theme">
             <button type="button" className="cvcli-theme-switch" onClick={toggleTheme}
@@ -377,7 +423,7 @@ export default function CvShell() {
                   <section className="cvcli-onboarding" aria-labelledby="cvcli-onboard-title">
                     <p className="cvcli-input-record"><span className="cvcli-prompt-mark">$</span> cv</p>
                     <p className="cvcli-note"><span className="cvcli-success">✓</span> Welcome. Before we start, one question:</p>
-                    <h2 id="cvcli-onboard-title">Have you used Bash or a terminal before?</h2>
+                    <h2 id="cvcli-onboard-title" ref={welcomeHeadingRef} tabIndex={-1}>Have you used Bash or a terminal before?</h2>
                     <div className="cvcli-onboard-actions">
                       <button type="button" onClick={() => chooseMode("expert")} className="cvcli-choice">
                         <span className="cvcli-choice-number">[ 1 ]</span><span>Yes, I have</span><span aria-hidden="true">↵</span>
