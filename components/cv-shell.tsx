@@ -67,7 +67,7 @@ export default function CvShell() {
   const welcomeHeadingRef = useRef<HTMLHeadingElement>(null);
   const lineId = useRef(0);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const homeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const homeTimer = useRef<number | null>(null);
   const scrollAnimationFrame = useRef<number | null>(null);
 
   // Keep the default dark appearance close to the supplied P.CV screenshot.
