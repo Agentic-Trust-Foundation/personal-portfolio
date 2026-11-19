@@ -115,6 +115,12 @@ describe("CV-only terminal commands", () => {
     }
     expect(executeCommand("cv projects fake -v").type).toBe("error");
   });
+  it("uses the professional domain email in the contact command", () => {
+    const contact = executeCommand("cv contact");
+    expect(contact.type).toBe("output");
+    expect(contact.lines).toContain("Email: mohammaddokht@gitups.ir");
+    expect(JSON.stringify(contact)).not.toContain("@gmail.com");
+  });
   it("downloads only the static PDF", () => {
     const pdf = executeCommand("cv download");
     expect(pdf.type).toBe("download");
