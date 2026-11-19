@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   Activity, ArrowRight, ArrowUpRight, Boxes, Check, ChevronRight,
-  CircleDot, Cpu, FileText, GitBranch, HeartPulse, Layers,
+  CircleDot, Cpu, FileText, GitBranch, HeartPulse, House, Layers,
   Play, RotateCcw, Send, Server, ShieldCheck, Sparkles, X,
   Terminal, Workflow, Zap,
 } from "lucide-react";
@@ -16,7 +16,7 @@ type Theme = "dark" | "light";
 type AiMode = "offline" | "online";
 type Message = { id: number; kind: "user" | "agent"; text: string; via?: "demo" | "cloudflare" };
 type Panel = "monitoring" | "cluster" | "pipeline" | "agent";
-type Props = { visible: boolean; theme: Theme; onRestore: () => void; onThemeToggle: () => void; aiEndpoint?: string };
+type Props = { visible: boolean; theme: Theme; onRestore: () => void; onHome: () => void; onThemeToggle: () => void; aiEndpoint?: string };
 
 const AI_ENDPOINT = process.env.NEXT_PUBLIC_OPS_AI_ENDPOINT?.trim() || "";
 const AI_TURN_LIMIT = 3;
@@ -27,13 +27,14 @@ const SAMPLE_ACTIONS: { label: string; input: string; action: LabIntent }[] = [
   { label: "Explain status", input: "Explain the current cluster status", action: "inspect" },
 ];
 const NODE_NAMES = ["worker-01", "worker-02", "worker-03"];
+const INITIAL_MESSAGES: Message[] = [
+  { id: 0, kind: "agent", text: "Welcome to the lab. Raise traffic, simulate a release, or inspect the cluster. Nothing here touches production.", via: "demo" },
+];
 
-export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle, aiEndpoint = AI_ENDPOINT }: Props) {
+export default function OpsDesktop({ visible, theme, onRestore, onHome, onThemeToggle, aiEndpoint = AI_ENDPOINT }: Props) {
   const [lab, setLab] = useState(initialLab);
   const [prompt, setPrompt] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    { id: 0, kind: "agent", text: "Welcome to the lab. Raise traffic, simulate a release, or inspect the cluster. Nothing here touches production.", via: "demo" },
-  ]);
+  const [messages, setMessages] = useState<Message[]>(() => INITIAL_MESSAGES);
   const [busy, setBusy] = useState(false);
   const [remoteUsed, setRemoteUsed] = useState(0);
   // Owner-controlled Cloudflare status. Visitors have no mode toggle.
@@ -209,6 +210,17 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle, a
     });
   }
 
+  function restartLab() {
+    // Restart the visual simulation without reloading the CV or granting
+    // additional Cloudflare calls. AI owner status and per-visit cap persist.
+    setLab(initialLab());
+    setPrompt("");
+    setMessages(INITIAL_MESSAGES);
+    messageId.current = 0;
+    setFocusPanel("agent");
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+  }
+
   return (
     <section className="ops-desktop" data-theme={theme} aria-label="AI Ops interactive desktop" aria-hidden={!visible}>
       <div className="ops-wallpaper" aria-hidden="true" />
@@ -219,6 +231,14 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle, a
         </div>
         <div className="ops-menubar-right">
           <span className="ops-live"><span /> SIMULATED · NO LIVE SYSTEMS</span>
+          <button type="button" className="ops-toolbar-action" onClick={onHome}
+            aria-label="Back to CV home screen" title="Back to welcome screen">
+            <House size={14} aria-hidden="true"/><span>HOME</span>
+          </button>
+          <button type="button" className="ops-toolbar-action" onClick={restartLab}
+            disabled={busy} aria-label="Restart AI Ops playground" title="Restart this demo">
+            <RotateCcw size={14} aria-hidden="true"/><span>RESTART</span>
+          </button>
           <button type="button" className="ops-theme" onClick={onThemeToggle} aria-label="Toggle desktop light and dark theme">{theme === "dark" ? "LIGHT" : "DARK"}</button>
         </div>
       </header>
@@ -351,7 +371,7 @@ export default function OpsDesktop({ visible, theme, onRestore, onThemeToggle, a
         <button type="button" onClick={() => openPanel("agent")} aria-label="Go to AI assistant" title="AI assistant"><Sparkles size={19}/></button>
         <div className="ops-dock-divider"/>
         <a href="/resume/" aria-label="Open resume" title="Read CV"><FileText size={19}/></a>
-        <button className="ops-dock-reset" type="button" title="Reset simulated lab" aria-label="Reset demo workspace" onClick={() => setLab(initialLab())}><RotateCcw size={17}/></button>
+        <button className="ops-dock-reset" type="button" title="Restart simulated lab" aria-label="Reset demo workspace" disabled={busy} onClick={restartLab}><RotateCcw size={17}/></button>
       </nav>
       <div className="ops-corner" aria-hidden="true">LAB / 2026 <ArrowRight size={12}/></div>
     </section>

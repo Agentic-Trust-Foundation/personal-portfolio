@@ -9,7 +9,8 @@
  *
  * Public inputs never leave Cloudflare except through this account's AI binding.
  */
-const MODEL = "@cf/meta/llama-3.1-8b-instruct";
+// The non-fast Llama 3.1 8B model was deprecated on 2026-05-30.
+const MODEL = "@cf/meta/llama-3.1-8b-instruct-fast";
 const ACTIONS = new Set(["surge", "normalize", "deploy", "inspect", "reset"]);
 const DESCRIPTION = {
   surge: "Traffic surge selected for the synthetic ops lab.",

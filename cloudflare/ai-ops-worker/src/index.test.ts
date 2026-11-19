@@ -103,7 +103,7 @@ describe("Free-only Cloudflare Worker (all AI mocked)", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ action: "surge", source: "cloudflare" });
     expect(e.AI.run).toHaveBeenCalledTimes(1);
-    expect(e.AI.run.mock.calls[0]?.[0]).toBe("@cf/meta/llama-3.1-8b-instruct");
+    expect(e.AI.run.mock.calls[0]?.[0]).toBe("@cf/meta/llama-3.1-8b-instruct-fast");
   });
   it("rejects unapproved model outputs and never relays model prose", async () => {
     const e = env({ AI: { run: vi.fn(async () => ({

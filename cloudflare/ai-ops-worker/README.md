@@ -7,14 +7,16 @@ calls, zero Worker usage, and no credentials**.
 ## Hard release gates (must all be true)
 
 1. Verify the exact Cloudflare account is **Workers Free**, not Paid or prepaid AI Gateway credits. Do not add a payment method for this experiment.
-2. Keep the model allowlisted as `@cf/meta/llama-3.1-8b-instruct`; re-check its Free eligibility in the official model catalog before activation. Never dynamically choose models from user input.
+2. Keep the model allowlisted as `@cf/meta/llama-3.1-8b-instruct-fast` (the non-fast model was deprecated 2026-05-30); re-check its continued availability and Free eligibility in the official model catalog before activation. Never dynamically choose models from user input.
 3. `AI_ENABLED` and `PLAN_ASSERTED_FREE` both default to `false`. Do not change them before owner approval. The second flag is a manual assertion, **not** a way to verify the Cloudflare billing plan.
 4. Set `ALLOWED_ORIGIN` to one exact approved Vercel Preview origin (e.g. `https://...vercel.app`, no trailing slash). Never use `*`. No browser API secrets.
 5. The Worker has approximate per-client (3/min) and per-location global (12/min) limits; **these are not strict worldwide quotas**. The Cloudflare Workers Free plan is the *only* actual no-billing guarantee. Do not deploy to Workers Paid under any circumstances.
 6. Enable `NEXT_PUBLIC_OPS_AI_ENDPOINT=https://<worker-host>/intent` only for a new **Preview** build, after the Worker has passed owner-reviewed Free-plan and CORS checks. Never set it for Production without separate approval.
 7. If any check fails or the free quota is exhausted, keep AI disabled and continue using the browser-only demo. Never silently route to a paid API.
 
-Official reference (verified 2026-11-19):
+Official reference (reviewed 2026-11-20):
+- https://developers.cloudflare.com/workers-ai/models/llama-3.1-8b-instruct-fast/ (pinned supported model, still verify actual Free eligibility)
+- https://developers.cloudflare.com/workers-ai/changelog/ (deprecated non-fast model)
 - https://developers.cloudflare.com/workers-ai/platform/pricing/ (10,000 Neurons/day free on Workers Free; no overage, requests fail)
 - https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/ (approximate POP-local rate limits)
 - https://developers.cloudflare.com/workers-ai/get-started/workers-wrangler/ (Workers AI binding)
@@ -65,4 +67,4 @@ Official documentation:
 - https://developers.cloudflare.com/workers-ai/platform/pricing/
 - https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
 
-**Current deployment:** This Worker has NOT been deployed; no Cloudflare account or billing plan has been verified in this chat. The Vercel site stays in Offline Demo by default.
+**Current deployment:** This Worker has NOT been deployed; no Cloudflare account or billing plan has been verified in this chat. The Vercel site stays in Offline Demo by default. Updating the model ID in source code does not enable or deploy it.

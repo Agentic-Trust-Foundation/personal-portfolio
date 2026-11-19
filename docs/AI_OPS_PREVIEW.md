@@ -70,3 +70,9 @@ Leaving PR #10 unmerged keeps the current site unchanged; close PR if rejected.
 - Kubernetes nodes: one cooling-fan indicator per displayed CPU-shaped workload/pod icon. A traffic surge increases visible pod icons (worker-01: 2, worker-02: 2, worker-03: 1) and speeds up fan rotation; it never creates extra fans unrelated to visible icons. `prefers-reduced-motion` removes rotation.
 - CI/CD: increment candidate version on every run, retain last successfully deployed version when Build or Security fails, and allow a retry with the next candidate. Failure cases `v1.8.5` Build and `v1.8.9` Security; varying stage durations imitate occasional slow builds. Reset restores v1.8.2.
 - The user-approved initial AI Ops desktop is already in Production via PR #10; this additional PR #11 is separate and must preserve the existing published site until verified.
+
+## Visible navigation and model-readiness fix — 2026-11-20
+
+- AI Ops header now exposes **HOME** (returns to the original Bash-experience welcome screen) and **RESTART** (clears simulated lab and assistant transcript without a full browser reload). The existing Dock's Terminal action still preserves the previous CV session.
+- Restart deliberately does **not** reset the Cloudflare call counter or change the owner-controlled AI mode. Existing pipeline versioning and failure scenarios remain unchanged.
+- The separate, still-undeployed Cloudflare scaffold now pins `@cf/meta/llama-3.1-8b-instruct-fast` instead of the non-fast model deprecated in May 2026. Free-plan and live model eligibility remain mandatory pre-deploy checks. There is no user-facing AI switch and no change to live AI status.
