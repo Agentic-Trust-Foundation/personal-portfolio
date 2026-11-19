@@ -57,17 +57,23 @@ export default {
       return new Response(null, { status: 204, headers: {
         ...securityHeaders,
         "Access-Control-Allow-Origin": allowed,
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Max-Age": "600",
         "Vary": "Origin",
       } });
     }
+    // Public read-only status: no passwords and no mutation endpoint.
+    // The owner alone controls AI_ENABLED through Cloudflare account access.
+    // Checking mode NEVER invokes the model, and it always fails closed.
+    const enabled = env.AI_ENABLED === "true" && env.PLAN_ASSERTED_FREE === "true" &&
+      Boolean(env.AI && env.GLOBAL_RATE && env.CLIENT_RATE);
+    if (request.method === "GET" && url.pathname === "/status") {
+      return json({ mode: enabled ? "online" : "offline", aiEnabled: enabled }, 200, allowed);
+    }
     if (request.method !== "POST" || url.pathname !== "/intent") return json({ error: "Not found" }, 404, allowed);
 
-    // Fail-closed until the owner verifies the Free-only plan and sets both flags.
-    if (env.AI_ENABLED !== "true" || env.PLAN_ASSERTED_FREE !== "true" ||
-        !env.AI || !env.GLOBAL_RATE || !env.CLIENT_RATE) {
+    if (!enabled) {
       return json({ error: "AI offline; use local demo" }, 503, allowed);
     }
     if (!(request.headers.get("Content-Type") || "").startsWith("application/json")) {
