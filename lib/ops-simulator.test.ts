@@ -9,14 +9,16 @@ function finish(state: ReturnType<typeof initialLab>) {
 describe("Synthetic AI Ops lab (no infrastructure or network)", () => {
   it("starts at the stable baseline and repeats its deterministic charts", () => {
     const lab = initialLab();
-    expect(labMetrics(lab)).toMatchObject({ nodes: 3, replicas: 3, ready: 3, version: "v1.8.2", fansPerNode: [1,1,1] });
+    expect(labMetrics(lab)).toMatchObject({ nodes: 3, replicas: 3, ready: 3, version: "v1.8.2", podsPerNode: [1,1,1] });
     expect(chartPoints(lab)).toEqual(chartPoints(initialLab()));
     expect(chartPoints(lab)).toHaveLength(36);
   });
-  it("scales pod counts and rotating fan indicators with traffic load", () => {
+  it("scales workload icons per worker and keeps their total equal to replicas", () => {
     const high = runLabAction(initialLab(), "surge");
-    expect(labMetrics(high)).toMatchObject({ rps: 972, replicas: 5, ready: 5, fansPerNode: [3,2,3] });
-    expect(labMetrics(runLabAction(high, "normalize"))).toMatchObject({ rps: 246, replicas: 3, fansPerNode: [1,1,1] });
+    const scaled = labMetrics(high);
+    expect(scaled).toMatchObject({ rps: 972, replicas: 5, ready: 5, podsPerNode: [2, 2, 1] });
+    expect(scaled.podsPerNode.reduce((total, count) => total + count, 0)).toBe(scaled.replicas);
+    expect(labMetrics(runLabAction(high, "normalize"))).toMatchObject({ rps: 246, replicas: 3, podsPerNode: [1,1,1] });
   });
   it("every run creates a new candidate, success advances deployed version, reset restores baseline", () => {
     let s = initialLab();
