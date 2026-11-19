@@ -91,51 +91,68 @@ describe("AI Ops workspace preview", () => {
     await act(async () => {
       root.render(<OpsDesktop visible theme="dark" onRestore={onRestore}
         onThemeToggle={onThemeToggle} aiEndpoint="https://example.workers.dev/intent" />);
+      await Promise.resolve();
     });
   };
-  it("starts OFFLINE even when a valid Cloudflare endpoint is available", async () => {
-    const fetchSpy = vi.fn();
+  it("shows no visitor on/off switch and remains offline without an owner status signal", async () => {
+    const fetchSpy = vi.fn(async () => ({ ok: false, status: 503 }));
     vi.stubGlobal("fetch", fetchSpy);
     await configured();
-    const offline = host.querySelector<HTMLButtonElement>('button[aria-label="Use Offline Demo without AI network requests"]');
-    const online = host.querySelector<HTMLButtonElement>('button[aria-label="Use Cloudflare AI for typed prompts"]');
-    expect(offline?.getAttribute("aria-pressed")).toBe("true");
-    expect(online?.disabled).toBe(false);
-    expect(online?.getAttribute("aria-pressed")).toBe("false");
-    await typePrompt("show status");
-    expect(fetchSpy).not.toHaveBeenCalled();
-    expect(host.textContent).toContain("synthetic");
-  });
-  it("uses Cloudflare once only after explicit opt-in, then OFF prevents further calls", async () => {
-    const fetchSpy = vi.fn().mockResolvedValue({
-      ok: true, json: async () => ({ action: "surge", reply: "Synthetic traffic increased." }),
-    });
-    vi.stubGlobal("fetch", fetchSpy);
-    await configured();
-    await click("Use Cloudflare AI for typed prompts");
-    const online = host.querySelector('button[aria-label="Use Cloudflare AI for typed prompts"]');
-    expect(online?.getAttribute("aria-pressed")).toBe("true");
+    expect(host.querySelectorAll(".ops-ai-mode-buttons")).toHaveLength(0);
+    expect(host.querySelectorAll("button[aria-label*='Cloudflare AI']")).toHaveLength(0);
+    expect(host.textContent).toContain("OFFLINE DEMO");
     await typePrompt("increase traffic");
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(fetchSpy.mock.calls.every(([, options]) => (options as RequestInit)?.method !== "POST")).toBe(true);
     expect(host.textContent).toContain("972");
-    await click("Use Offline Demo without AI network requests");
-    expect(online?.getAttribute("aria-pressed")).toBe("false");
-    await typePrompt("show status");
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
-    expect(host.textContent).toContain("synthetic");
   });
-  it("fails closed to local demo when the owner disables the Worker globally", async () => {
-    const fetchSpy = vi.fn().mockResolvedValue({ ok: false, status: 503 });
+  it("uses Cloudflare when the OWNER enables it, not through a visitor switch", async () => {
+    const fetchSpy = vi.fn(async (_url: string, options?: RequestInit) =>
+      options?.method === "GET"
+        ? { ok: true, json: async () => ({ mode: "online", aiEnabled: true }) }
+        : { ok: true, json: async () => ({ action: "surge", reply: "Synthetic traffic increased." }) }
+    );
     vi.stubGlobal("fetch", fetchSpy);
     await configured();
-    await click("Use Cloudflare AI for typed prompts");
+    expect(host.textContent).toContain("CLOUDFLARE AI · OWNER ENABLED");
+    await typePrompt("increase traffic");
+    expect(fetchSpy.mock.calls.filter(([, opts]) => (opts as RequestInit)?.method === "POST")).toHaveLength(1);
+    expect(host.textContent).toContain("972");
+    expect(host.querySelectorAll(".ops-ai-mode-buttons")).toHaveLength(0);
+  });
+  it("switches all visitors to offline after owner disables the Worker", async () => {
+    let enabled = true;
+    const fetchSpy = vi.fn(async (_url: string, options?: RequestInit) =>
+      options?.method === "GET"
+        ? { ok: true, json: async () => ({ mode: enabled ? "online" : "offline", aiEnabled: enabled }) }
+        : { ok: true, json: async () => ({ action: "inspect", reply: "Synthetic inspection." }) }
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+    await configured();
+    expect(host.textContent).toContain("OWNER ENABLED");
+    enabled = false;
+    await act(async () => {
+      document.dispatchEvent(new Event("visibilitychange"));
+      await Promise.resolve();
+    });
+    expect(host.textContent).toContain("OFFLINE DEMO");
     await typePrompt("show status");
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
-    const online = host.querySelector<HTMLButtonElement>('button[aria-label="Use Cloudflare AI for typed prompts"]');
-    expect(online?.disabled).toBe(true);
+    expect(fetchSpy.mock.calls.filter(([, opts]) => (opts as RequestInit)?.method === "POST")).toHaveLength(0);
+    expect(host.textContent).toContain("synthetic");
+  });
+  it("falls back locally on a server-side disabled response even if status was previously enabled", async () => {
+    const fetchSpy = vi.fn(async (_url: string, options?: RequestInit) =>
+      options?.method === "GET"
+        ? { ok: true, json: async () => ({ mode: "online", aiEnabled: true }) }
+        : { ok: false, status: 503 }
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+    await configured();
+    await typePrompt("show status");
+    expect(host.textContent).toContain("OFFLINE DEMO");
     expect(host.textContent).toContain("Switched to the local demo");
     await typePrompt("increase traffic");
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy.mock.calls.filter(([, opts]) => (opts as RequestInit)?.method === "POST")).toHaveLength(1);
     expect(host.textContent).toContain("972");
   });
   it("offers a working dock to restore the CV and a theme toggle", async () => {
