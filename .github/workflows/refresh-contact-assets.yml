@@ -8,6 +8,7 @@ on:
       - fix/contact-email-gitups-20261120
     paths:
       - content/profile.json
+      - .github/workflows/refresh-contact-assets.yml
 
 permissions:
   contents: write
@@ -15,7 +16,7 @@ permissions:
 jobs:
   regenerate:
     if: github.repository == 'Agentic-Trust-Foundation/personal-portfolio'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Checkout this exact trusted branch
