@@ -15,7 +15,7 @@ const DIRECTION_KEYS: Record<string, SnakeDirection> = {
   arrowright: "right", d: "right",
 };
 
-export default function CvSnake({ onExit }: { onExit: (score: number) => void }) {
+export default function CvSnake({ onExit, suspended = false }: { onExit: (score: number) => void; suspended?: boolean }) {
   const [game, setGame] = useState(() => newSnakeGame(Date.now()));
   const [savedBest, setSavedBest] = useState(0);
   const bestWritten = useRef(0);
@@ -45,10 +45,10 @@ export default function CvSnake({ onExit }: { onExit: (score: number) => void })
   }, [game.score]);
 
   useEffect(() => {
-    if (game.status !== "playing") return;
+    if (game.status !== "playing" || suspended) return;
     const timer = window.setInterval(() => setGame((previous) => advanceSnake(previous)), SNAKE_TICK_MS);
     return () => window.clearInterval(timer);
-  }, [game.status]);
+  }, [game.status, suspended]);
 
   useEffect(() => {
     const handleVisibility = () => {

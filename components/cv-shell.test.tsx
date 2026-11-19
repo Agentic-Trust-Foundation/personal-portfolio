@@ -158,6 +158,44 @@ describe("Terminal-first CV interaction", () => {
     expect(host.textContent).toContain("Have you used Bash or a terminal before?");
   });
 
+  it("minimizes to the interactive desktop and restores the same terminal session", async () => {
+    await click("Yes, I have");
+    const input = host.querySelector("#cvcli-command") as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+    if (!setter) throw new Error("Missing native value setter");
+    await act(async () => {
+      setter.call(input, "cv help");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => {
+      host.querySelector<HTMLFormElement>(".cvcli-form")?.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true })
+      );
+    });
+    expect(host.querySelectorAll(".cvcli-turn")).toHaveLength(1);
+    await click("Minimize terminal to AI Ops desktop");
+    expect(host.querySelector(".cvcli-desktop-open")).toBeTruthy();
+    expect(host.querySelector(".cvcli-shell")?.getAttribute("aria-hidden")).toBe("true");
+    expect(host.textContent).toContain("AI & Platform");
+    expect(host.textContent).toContain("Observability");
+    await click("Spike traffic");
+    expect(host.textContent).toContain("972");
+    await click("Restore CV terminal");
+    expect(host.querySelector(".cvcli-desktop-open")).toBeNull();
+    expect(host.querySelector(".cvcli-shell")?.getAttribute("aria-hidden")).toBe("false");
+    expect(host.querySelectorAll(".cvcli-turn")).toHaveLength(1);
+    expect(host.textContent).toContain("Available CV commands");
+  });
+
+  it("maximizes and restores without closing or reloading the CV shell", async () => {
+    await click("Maximize terminal window");
+    expect(host.querySelector(".cvcli-window-maximized")).toBeTruthy();
+    await click("Restore terminal window size");
+    expect(host.querySelector(".cvcli-window-maximized")).toBeNull();
+    expect(host.querySelectorAll(".cvcli-light-red")).toHaveLength(1);
+    expect(host.querySelectorAll(".cvcli-light-red button")).toHaveLength(0);
+  });
+
   it("starts in the dark terminal and asks about Bash", () => {
     expect(host.querySelector(".cvcli-shell")).toBeTruthy();
     expect(host.querySelector(".cvcli-viewport")?.getAttribute("data-theme")).toBe("dark");
